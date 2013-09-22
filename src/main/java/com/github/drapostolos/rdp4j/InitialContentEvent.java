@@ -3,8 +3,8 @@ package com.github.drapostolos.rdp4j;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
  * An event that provides the initial content of the {@link PolledDirectory}.

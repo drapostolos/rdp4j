@@ -1,6 +1,6 @@
 package com.github.drapostolos.rdp4j;
 
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
  * A listener of {@link FileAddedEvent} / {@link FileRemovedEvent} / {@link FileModifiedEvent}

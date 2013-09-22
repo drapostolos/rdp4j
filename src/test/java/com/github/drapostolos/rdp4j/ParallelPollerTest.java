@@ -10,9 +10,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.github.drapostolos.adp4j.core.DirectoryPoller;
-import com.github.drapostolos.adp4j.core.PollerTask;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(PollerTask.class)

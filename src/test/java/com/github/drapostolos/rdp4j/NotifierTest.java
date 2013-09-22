@@ -7,12 +7,6 @@ import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.github.drapostolos.adp4j.core.Adp4jListener;
-import com.github.drapostolos.adp4j.core.DirectoryListener;
-import com.github.drapostolos.adp4j.core.FileAddedEvent;
-import com.github.drapostolos.adp4j.core.IoErrorListener;
-import com.github.drapostolos.adp4j.core.ListenerNotifier;
-
 
 public class NotifierTest {
 	

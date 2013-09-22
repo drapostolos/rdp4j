@@ -2,7 +2,7 @@ package com.github.drapostolos.rdp4j;
 
 import java.io.IOException;
 
-import com.github.drapostolos.adp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.FileElement;
 
 /*
  * Make a stub so equals/hashCode methods can be implemented correctly.

@@ -11,17 +11,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.github.drapostolos.adp4j.core.AbstractAdp4jListener;
-import com.github.drapostolos.adp4j.core.AfterPollingCycleEvent;
-import com.github.drapostolos.adp4j.core.AfterStopEvent;
-import com.github.drapostolos.adp4j.core.BeforePollingCycleEvent;
-import com.github.drapostolos.adp4j.core.BeforeStartEvent;
-import com.github.drapostolos.adp4j.core.DirectoryPoller;
-import com.github.drapostolos.adp4j.core.FileAddedEvent;
-import com.github.drapostolos.adp4j.core.InitialContentEvent;
-import com.github.drapostolos.adp4j.core.RegexFileFilter;
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 public class AcceptanceTest extends EventVerifier {
 

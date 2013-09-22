@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
  * This is the timer thread which is executed every n milliseconds

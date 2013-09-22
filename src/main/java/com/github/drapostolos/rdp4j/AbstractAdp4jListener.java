@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
  * This is a Skeletal implementation of all {@link Adp4jListener} sub-interfaces. 

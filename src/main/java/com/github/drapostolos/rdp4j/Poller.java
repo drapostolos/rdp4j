@@ -11,8 +11,8 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 class Poller implements Callable<Object>{
 	private static Logger logger = LoggerFactory.getLogger(PollerTask.class);

@@ -9,11 +9,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.drapostolos.adp4j.core.AbstractAdp4jListener;
-import com.github.drapostolos.adp4j.core.BeforeStartEvent;
-import com.github.drapostolos.adp4j.core.DirectoryPoller;
-import com.github.drapostolos.adp4j.core.ListenerNotifier;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 @RunWith(PowerMockRunner.class)
 public class ListenerThrowsExceptionTest {

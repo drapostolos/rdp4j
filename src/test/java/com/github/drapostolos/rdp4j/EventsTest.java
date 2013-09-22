@@ -6,11 +6,8 @@ import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.github.drapostolos.adp4j.core.DirectoryPoller;
-import com.github.drapostolos.adp4j.core.FileAddedEvent;
-import com.github.drapostolos.adp4j.core.IoErrorRaisedEvent;
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 public class EventsTest {
 	

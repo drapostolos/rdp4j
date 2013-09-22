@@ -14,24 +14,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.github.drapostolos.adp4j.core.AbstractAdp4jListener;
-import com.github.drapostolos.adp4j.core.Adp4jListener;
-import com.github.drapostolos.adp4j.core.AfterPollingCycleEvent;
-import com.github.drapostolos.adp4j.core.BeforePollingCycleEvent;
-import com.github.drapostolos.adp4j.core.DefaultFileFilter;
-import com.github.drapostolos.adp4j.core.DirectoryPoller;
-import com.github.drapostolos.adp4j.core.DirectoryPollerException;
-import com.github.drapostolos.adp4j.core.FileAddedEvent;
-import com.github.drapostolos.adp4j.core.FileModifiedEvent;
-import com.github.drapostolos.adp4j.core.FileRemovedEvent;
-import com.github.drapostolos.adp4j.core.InitialContentEvent;
-import com.github.drapostolos.adp4j.core.IoErrorCeasedEvent;
-import com.github.drapostolos.adp4j.core.IoErrorRaisedEvent;
-import com.github.drapostolos.adp4j.core.ListenerNotifier;
-import com.github.drapostolos.adp4j.core.PollerTask;
-import com.github.drapostolos.adp4j.core.RegexFileFilter;
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 public class PollerTaskTest extends EventVerifier {
 

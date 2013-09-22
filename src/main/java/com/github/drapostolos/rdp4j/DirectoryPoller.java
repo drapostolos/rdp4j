@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
  * The DirectoryPoller, used for adding/removing {@link Adp4jListener}s/{@link PolledDirectory}'s 

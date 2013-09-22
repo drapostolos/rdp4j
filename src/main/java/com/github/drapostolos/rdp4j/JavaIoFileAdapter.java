@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
  * An adapter for java's {@link File} class, that enables monitoring a directory 

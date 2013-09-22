@@ -13,7 +13,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 @RunWith(PowerMockRunner.class)
 public class PollerTaskRuntimeExceptionThrownTest extends EventVerifier{

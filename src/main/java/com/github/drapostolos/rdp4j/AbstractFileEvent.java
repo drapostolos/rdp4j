@@ -1,7 +1,7 @@
 package com.github.drapostolos.rdp4j;
 
-import com.github.drapostolos.adp4j.spi.FileElement;
-import com.github.drapostolos.adp4j.spi.PolledDirectory;
+import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 abstract class AbstractFileEvent extends AbstractDirectoryEvent{
 	private final FileElement file;

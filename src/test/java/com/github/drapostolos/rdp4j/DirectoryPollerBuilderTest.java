@@ -4,9 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import com.github.drapostolos.adp4j.core.DirectoryPoller;
-import com.github.drapostolos.adp4j.core.DirectoryPollerBuilder;
-
 public class DirectoryPollerBuilderTest {
 	DirectoryPollerBuilder builder = DirectoryPoller.newBuilder();	
 	
