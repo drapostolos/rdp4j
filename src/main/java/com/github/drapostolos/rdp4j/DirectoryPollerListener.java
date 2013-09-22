@@ -6,16 +6,16 @@ package com.github.drapostolos.rdp4j;
  * of the {@link DirectoryPoller}.
  * <p>
  * NOTE! Only implementations of this interface added
- * through this method {@link DirectoryPollerBuilder#addListener(Adp4jListener)}
+ * through this method {@link DirectoryPollerBuilder#addListener(Rdp4jListener)}
  * will receive {@link BeforeStartEvent} events. 
  *
  */
-public interface DirectoryPollerListener extends Adp4jListener{
+public interface DirectoryPollerListener extends Rdp4jListener{
 
 	/**
 	 * Invoked once before the {@link DirectoryPoller} is started.
 	 * <p>
-	 * NOTE! Only listeners added through this method {@link DirectoryPollerBuilder#addListener(Adp4jListener)}
+	 * NOTE! Only listeners added through this method {@link DirectoryPollerBuilder#addListener(Rdp4jListener)}
 	 * will receive {@link BeforeStartEvent} events. 
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.

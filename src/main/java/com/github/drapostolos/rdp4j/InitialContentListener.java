@@ -4,7 +4,7 @@ package com.github.drapostolos.rdp4j;
  * A listener of the {@link InitialContentEvent} event of the {@link DirectoryPoller}.
  *
  */
-public interface InitialContentListener extends Adp4jListener{
+public interface InitialContentListener extends Rdp4jListener{
 	/**
 	 * Invoked once during the first poll-cycle of the {@link DirectoryPoller}.
 	 * 

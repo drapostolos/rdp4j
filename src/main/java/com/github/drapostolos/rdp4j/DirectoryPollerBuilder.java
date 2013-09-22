@@ -24,7 +24,7 @@ public final class DirectoryPollerBuilder {
 	String threadName = DEFAULT_THREAD_NAME;
 	boolean fileAddedEventEnabledForInitialContent = false;
 	boolean parallelDirectoryPollingEnabled = false;
-	Set<Adp4jListener> listeners = new HashSet<Adp4jListener>();
+	Set<Rdp4jListener> listeners = new HashSet<Rdp4jListener>();
 	
 
 	DirectoryPollerBuilder(){ // package-private access only.
@@ -145,19 +145,19 @@ public final class DirectoryPollerBuilder {
 	}
 
 	/**
-	 * Adds the given <code>listener</code> to the list of {@link Adp4jListener}'s
+	 * Adds the given <code>listener</code> to the list of {@link Rdp4jListener}'s
 	 * that receives notifications.
 	 * <p>
 	 * Once the {@link DirectoryPoller} has been built, it can be used to 
 	 * add additional listeners, or remove listeners.
 	 * 
-	 * @param listener Implementation of any of the sub-interfaces of {@link Adp4jListener}-interface.
+	 * @param listener Implementation of any of the sub-interfaces of {@link Rdp4jListener}-interface.
 	 * 
 	 * @return {@link DirectoryPollerBuilder}
 	 * 
 	 * @throws NullPointerException if the given argument is null.
 	 */
-	public DirectoryPollerBuilder addListener(Adp4jListener listener) {
+	public DirectoryPollerBuilder addListener(Rdp4jListener listener) {
 		if(listener == null){
 			throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
 		}

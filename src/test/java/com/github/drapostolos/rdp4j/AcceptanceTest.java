@@ -19,7 +19,7 @@ public class AcceptanceTest extends EventVerifier {
 	@Before
 	public void testFixture() throws Exception {
 		directoryMock = Mockito.mock(PolledDirectory.class);
-		listenerMock = Mockito.mock(AbstractAdp4jListener.class);
+		listenerMock = Mockito.mock(AbstractRdp4jListener.class);
 		inOrder = Mockito.inOrder(listenerMock);
 	}
 	

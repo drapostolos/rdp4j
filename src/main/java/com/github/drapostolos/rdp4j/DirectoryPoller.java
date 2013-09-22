@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
- * The DirectoryPoller, used for adding/removing {@link Adp4jListener}s/{@link PolledDirectory}'s 
+ * The DirectoryPoller, used for adding/removing {@link Rdp4jListener}s/{@link PolledDirectory}'s 
  * and terminating the poller mechanism. 
  * <p>
  * Simple usage example:
@@ -139,9 +139,9 @@ public class DirectoryPoller {
 	 * 
 	 * @throws NullPointerException if given <code>listener</code> is null.
 	 * 
-	 * @param listener implementation of any of the sub-interfaces of {@link Adp4jListener}.
+	 * @param listener implementation of any of the sub-interfaces of {@link Rdp4jListener}.
 	 */
-	public void addListener(Adp4jListener listener){
+	public void addListener(Rdp4jListener listener){
 		if(listener == null){
 			throw new NullPointerException("Argument is null.");
 		}
@@ -155,11 +155,11 @@ public class DirectoryPoller {
 	 * then the given <code>listener</code> will be removed just before 
 	 * next poll-cycle is started.
 	 * 
-	 * @param listener implementation of any of the sub-interfaces of {@link Adp4jListener}-interface.
+	 * @param listener implementation of any of the sub-interfaces of {@link Rdp4jListener}-interface.
 	 * 
 	 * @throws NullPointerException if the given argument is null.e
 	 */
-	public void removeListener(Adp4jListener listener){
+	public void removeListener(Rdp4jListener listener){
 		if(listener == null){
 			throw new NullPointerException("Argument is null.");
 		}

@@ -22,7 +22,7 @@ public class ListenerThrowsExceptionTest {
 		Logger loggerMock = Mockito.mock(Logger.class);
 		PowerMockito.mockStatic(LoggerFactory.class);
 		Mockito.when(LoggerFactory.getLogger(ListenerNotifier.class)).thenReturn(loggerMock);
-		AbstractAdp4jListener listenerMock = Mockito.mock(AbstractAdp4jListener.class);
+		AbstractRdp4jListener listenerMock = Mockito.mock(AbstractRdp4jListener.class);
 		Mockito.doThrow(RuntimeException.class).when(listenerMock).beforeStart(Mockito.any(BeforeStartEvent.class));
 		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
 

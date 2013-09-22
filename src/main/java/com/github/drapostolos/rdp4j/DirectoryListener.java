@@ -7,7 +7,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * events of the {@link DirectoryPoller}.
  *
  */
-public interface DirectoryListener extends Adp4jListener{
+public interface DirectoryListener extends Rdp4jListener{
 	/**
 	 * Invoked each time a new file is added in the {@link PolledDirectory}.
 	 * 

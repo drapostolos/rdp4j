@@ -5,7 +5,7 @@ package com.github.drapostolos.rdp4j;
  * events of the {@link DirectoryPoller}.
  *
  */
-public interface PollCycleListener extends Adp4jListener{
+public interface PollCycleListener extends Rdp4jListener{
 
 	/**
 	 * Invoked before each poll-cycle start.

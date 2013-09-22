@@ -13,7 +13,7 @@ public class NotifierTest {
 	@Test
 	public void constructNotifierWithNoListener() throws Exception {
 		// when
-		ListenerNotifier n = new ListenerNotifier(new HashSet<Adp4jListener>());
+		ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
 		
 		// then
 		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(0);
@@ -22,8 +22,8 @@ public class NotifierTest {
 	@Test
 	public void constructNotifierWithOneListener() throws Exception {
 		// given
-		Set<Adp4jListener> l = new HashSet<Adp4jListener>();
-		l.add(new Adp4jListener(){});
+		Set<Rdp4jListener> l = new HashSet<Rdp4jListener>();
+		l.add(new Rdp4jListener(){});
 		
 		// when
 		ListenerNotifier n = new ListenerNotifier(l);
@@ -34,10 +34,10 @@ public class NotifierTest {
 	
 	@Test
 	public void AddAndRemoveListeners() throws Exception {
-		ListenerNotifier n = new ListenerNotifier(new HashSet<Adp4jListener>());
+		ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
 		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(0);
 		
-		Adp4jListener l = new Adp4jListener(){};
+		Rdp4jListener l = new Rdp4jListener(){};
 		n.addListener(l);
 		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(1);
 		n.removeListener(l);
@@ -47,10 +47,10 @@ public class NotifierTest {
 	@Test
 	public void addSameListenerTwice() throws Exception {
 		// given
-		ListenerNotifier n = new ListenerNotifier(new HashSet<Adp4jListener>());
+		ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
 		
 		// when
-		Adp4jListener l = new Adp4jListener(){};
+		Rdp4jListener l = new Rdp4jListener(){};
 		n.addListener(l);
 		n.addListener(l);
 		
@@ -61,7 +61,7 @@ public class NotifierTest {
 	@Test
 	public void notifyListenersOfFileAddedEvent() throws Exception {
 		// given
-		ListenerNotifier n = new ListenerNotifier(new HashSet<Adp4jListener>());
+		ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
 		DirectoryListener l1 = Mockito.mock(DirectoryListener.class);
 		IoErrorListener l2 = Mockito.mock(IoErrorListener.class);
 		DirectoryListener l3 = Mockito.mock(DirectoryListener.class);

@@ -26,12 +26,12 @@ public class PollerTaskRuntimeExceptionThrownTest extends EventVerifier{
 		PowerMockito.mockStatic(LoggerFactory.class);
 		Mockito.when(LoggerFactory.getLogger(PollerTask.class)).thenReturn(loggerMock);
 		PolledDirectory directory = Mockito.mock(PolledDirectory.class);
-		listenerMock = Mockito.mock(AbstractAdp4jListener.class);
+		listenerMock = Mockito.mock(AbstractRdp4jListener.class);
 		inOrder = Mockito.inOrder(listenerMock);
 		DirectoryPoller dp = Mockito.mock(DirectoryPoller.class);
 		Mockito.when(dp.getDefaultFileFilter()).thenReturn(new DefaultFileFilter());
 		dp.directories = new HashSet<PolledDirectory>(Arrays.asList(directory));
-		dp.notifier = new ListenerNotifier(new HashSet<Adp4jListener>(Arrays.asList(listenerMock)));
+		dp.notifier = new ListenerNotifier(new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
 		dp.timer = Mockito.mock(Timer.class);
 		pollerTask = new PollerTask(dp);
 		

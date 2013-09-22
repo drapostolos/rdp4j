@@ -13,7 +13,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 class EventVerifier {
 
 	protected PollerTask pollerTask;
-	protected AbstractAdp4jListener listenerMock;
+	protected AbstractRdp4jListener listenerMock;
 	protected InOrder inOrder;
 	protected Set<PolledDirectory> directories = new LinkedHashSet<PolledDirectory>();
 	protected PolledDirectory directoryMock;

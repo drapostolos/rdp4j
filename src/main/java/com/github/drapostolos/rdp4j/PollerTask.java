@@ -28,8 +28,8 @@ final class PollerTask extends TimerTask {
 	private final DirectoryPoller dp;
 	private final Map<PolledDirectory, Poller> pollers = new LinkedHashMap<PolledDirectory, Poller>();
 	private final ListenerNotifier notifier;
-	private Queue<Adp4jListener> listenersToRemove = new ConcurrentLinkedQueue<Adp4jListener>();
-	private Queue<Adp4jListener> listenersToAdd = new ConcurrentLinkedQueue<Adp4jListener>();
+	private Queue<Rdp4jListener> listenersToRemove = new ConcurrentLinkedQueue<Rdp4jListener>();
+	private Queue<Rdp4jListener> listenersToAdd = new ConcurrentLinkedQueue<Rdp4jListener>();
 	private Queue<PolledDirectory> directoriesToAdd = new ConcurrentLinkedQueue<PolledDirectory>();
 	private Queue<PolledDirectory> directoriesToRemove = new ConcurrentLinkedQueue<PolledDirectory>();;
 	final ExecutorService executor;
@@ -84,7 +84,7 @@ final class PollerTask extends TimerTask {
 	}
 
 	private void addRemoveListeners() {
-		Adp4jListener listener;
+		Rdp4jListener listener;
 		while((listener = listenersToAdd.poll()) != null){
 			notifier.addListener(listener);
 		}
@@ -93,11 +93,11 @@ final class PollerTask extends TimerTask {
 		}
 	}
 
-	void addListener(Adp4jListener listener) {
+	void addListener(Rdp4jListener listener) {
 		listenersToAdd.add(listener);
 	}
 
-	void removeListener(Adp4jListener listener) {
+	void removeListener(Rdp4jListener listener) {
 		listenersToRemove.add(listener);
 	}
 

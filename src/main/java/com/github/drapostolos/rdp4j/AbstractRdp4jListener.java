@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
- * This is a Skeletal implementation of all {@link Adp4jListener} sub-interfaces. 
+ * This is a Skeletal implementation of all {@link Rdp4jListener} sub-interfaces. 
  * Contains default implementations of all methods.
  * <p>
  * It is up to the client to implement any desired methods.
  *
  */
-public class AbstractAdp4jListener implements DirectoryListener, IoErrorListener, DirectoryPollerListener, PollCycleListener, InitialContentListener{
-	private static final Logger logger = LoggerFactory.getLogger(AbstractAdp4jListener.class);
+public class AbstractRdp4jListener implements DirectoryListener, IoErrorListener, DirectoryPollerListener, PollCycleListener, InitialContentListener{
+	private static final Logger logger = LoggerFactory.getLogger(AbstractRdp4jListener.class);
 
 	/**
 	 * Dummy implementation doing nothing.

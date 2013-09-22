@@ -4,7 +4,7 @@ package com.github.drapostolos.rdp4j;
  * A listener of {@link IoErrorRaisedEvent}/{@link IoErrorCeasedEvent} events
  * of the {@link DirectoryPoller}.
  */
-public interface IoErrorListener extends Adp4jListener{
+public interface IoErrorListener extends Rdp4jListener{
 	
 	/**
 	 * Invoked when an I/O error occurs in the {@link DirectoryPoller}.

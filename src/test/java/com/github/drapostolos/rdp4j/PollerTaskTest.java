@@ -22,13 +22,13 @@ public class PollerTaskTest extends EventVerifier {
 	@Before
 	public void testFixture() throws Exception {
 		directoryMock = Mockito.mock(PolledDirectory.class);
-		listenerMock = Mockito.mock(AbstractAdp4jListener.class);
+		listenerMock = Mockito.mock(AbstractRdp4jListener.class);
 		inOrder = Mockito.inOrder(listenerMock);
 		directoryPollerMock = Mockito.mock(DirectoryPoller.class);
 		Mockito.when(directoryPollerMock.getDefaultFileFilter()).thenReturn(new DefaultFileFilter());
 		directories.add(directoryMock);
 		directoryPollerMock.directories = directories;
-		directoryPollerMock.notifier = new ListenerNotifier(new HashSet<Adp4jListener>(Arrays.asList(listenerMock)));
+		directoryPollerMock.notifier = new ListenerNotifier(new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
 		pollerTask = new PollerTask(directoryPollerMock);
 	}
 	
