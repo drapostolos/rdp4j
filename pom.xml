@@ -4,7 +4,7 @@
 	<groupId>com.github.drapostolos</groupId>
 	<artifactId>rdp4j</artifactId>
 	<name>rdp4j</name>
-	<version>0.0.8</version>
+	<version>0.0.9-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<url>http://maven.apache.org</url>
