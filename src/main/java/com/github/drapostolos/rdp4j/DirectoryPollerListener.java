@@ -9,6 +9,7 @@ package com.github.drapostolos.rdp4j;
  * through this method {@link DirectoryPollerBuilder#addListener(Rdp4jListener)}
  * will receive {@link BeforeStartEvent} events. 
  *
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
  */
 public interface DirectoryPollerListener extends Rdp4jListener{
 

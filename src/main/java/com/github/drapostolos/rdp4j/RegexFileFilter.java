@@ -8,6 +8,7 @@ import com.github.drapostolos.rdp4j.spi.FileElement;
  * A {@link FileFilter} accepting only {@link FileElement}s, who's name matches 
  * a regular expression.
  * 
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
  */
 public final class RegexFileFilter implements FileFilter{
 	private final Pattern pattern;

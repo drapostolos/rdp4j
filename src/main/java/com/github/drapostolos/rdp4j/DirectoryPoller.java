@@ -25,6 +25,8 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * 		dp.stop();
  * 
  * </pre>
+ * 
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
  */
 public class DirectoryPoller {
 	private static final long WITH_NO_DELAY = 0;

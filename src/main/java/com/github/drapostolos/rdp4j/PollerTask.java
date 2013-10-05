@@ -21,8 +21,6 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * directory in question and notify listeners if files are added/removed/modified,
  * or if IO Error has been raised/ceased.
  */
-
-
 final class PollerTask extends TimerTask {
 	private static Logger logger = LoggerFactory.getLogger(PollerTask.class);
 	private final DirectoryPoller dp;
