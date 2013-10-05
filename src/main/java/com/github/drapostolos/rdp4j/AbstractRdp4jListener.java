@@ -13,7 +13,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * <p>
  * It is up to the client to implement any desired methods.
  * 
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  *
  */
 public class AbstractRdp4jListener implements DirectoryListener, IoErrorListener, DirectoryPollerListener, PollCycleListener, InitialContentListener{

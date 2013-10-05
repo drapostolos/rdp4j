@@ -2,10 +2,16 @@ package com.github.drapostolos.rdp4j.spi;
 
 import java.io.IOException;
 
+import com.github.drapostolos.rdp4j.DirectoryPoller;
+import com.github.drapostolos.rdp4j.DirectoryPollerException;
+import com.github.drapostolos.rdp4j.IoErrorListener;
+import com.github.drapostolos.rdp4j.IoErrorRaisedEvent;
+
 /**
  * Implementations of this interface represent a file element in the polled
  * directory.
- *
+ * 
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public interface FileElement {
 

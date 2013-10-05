@@ -6,7 +6,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * A listener of {@link FileAddedEvent} / {@link FileRemovedEvent} / {@link FileModifiedEvent}
  * events of the {@link DirectoryPoller}.
  * 
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  *
  */
 public interface DirectoryListener extends Rdp4jListener{

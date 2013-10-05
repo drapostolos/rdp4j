@@ -6,7 +6,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 /**
  * An event that represents a modified file in the {@link PolledDirectory}.
  *
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class FileModifiedEvent extends AbstractFileEvent {
 

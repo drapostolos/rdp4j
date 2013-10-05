@@ -16,7 +16,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * Using this to listen to events on your local file system is discouraged, use the Java7 WatchService
  * functionality instead. For Java6 see other options <a href=http://www.rgagnon.com/javadetails/java-0617.html>here</a>.
  *
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class JavaIoFileAdapter implements FileElement, PolledDirectory{
 	private final File file;

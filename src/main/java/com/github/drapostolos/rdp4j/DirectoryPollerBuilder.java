@@ -12,7 +12,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * A builder class that configures and then returns a started 
  * {@link DirectoryPoller} instance.
  * 
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class DirectoryPollerBuilder {
 	private static final String NULL_ARGUMENT_ERROR_MESSAGE = "null argument not allowed!";

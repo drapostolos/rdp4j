@@ -3,10 +3,16 @@ package com.github.drapostolos.rdp4j.spi;
 import java.io.IOException;
 import java.util.Set;
 
+import com.github.drapostolos.rdp4j.DirectoryPoller;
+import com.github.drapostolos.rdp4j.DirectoryPollerException;
+import com.github.drapostolos.rdp4j.IoErrorListener;
+import com.github.drapostolos.rdp4j.IoErrorRaisedEvent;
+
 /**
  * Implementations of this interface represents the directory to poll for 
  * file elements.
- *
+ * 
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public interface PolledDirectory {
 	
@@ -52,7 +58,7 @@ public interface PolledDirectory {
 	
 	/**
 	 * It is recommended to implement this method if clients wants to remove this
-	 * {@link PolledDirectory} from the {@link DirectoryPoller}.
+	 * {@link PolledDirectory} using {@link DirectoryPoller#removePolledDirectory(PolledDirectory)} .
 	 */
 	@Override
 	public int hashCode();

@@ -28,7 +28,7 @@ public class DirectoryPollerTest {
 				.start();
 		
 		// when
-		dp.addDirectory(null);
+		dp.addPolledDirectory(null);
 	}
 
 	@Test(expected = NullPointerException.class)
@@ -40,7 +40,7 @@ public class DirectoryPollerTest {
 				.start();
 		
 		// when
-		dp.removeDirectory(null);
+		dp.removePolledDirectory(null);
 	}
 
 	@Test(expected = NullPointerException.class)

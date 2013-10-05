@@ -130,15 +130,15 @@ public class AcceptanceTest extends EventVerifier {
 				.addPolledDirectory(directoryMock)
 				.setPollingInterval(10, TimeUnit.MILLISECONDS)
 				.start();
-		dp.addDirectory(directoryMock2);
+		dp.addPolledDirectory(directoryMock2);
 		
 		// then 
 		TimeUnit.MILLISECONDS.sleep(15); // to assure a polling cycle has passed
 		Assertions.assertThat(dp.getPolledDirectories()).contains(directoryMock, directoryMock2);
 		
 		// when 
-		dp.removeDirectory(directoryMock);
-		dp.removeDirectory(directoryMock2);
+		dp.removePolledDirectory(directoryMock);
+		dp.removePolledDirectory(directoryMock2);
 		
 		// then
 		TimeUnit.MILLISECONDS.sleep(15); // to assure a polling cycle has passed

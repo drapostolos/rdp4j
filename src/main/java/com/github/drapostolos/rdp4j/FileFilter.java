@@ -8,7 +8,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * A filter applied when listing {@link FileElement}s in a {@link PolledDirectory}.
  * Only {@link FileElement} satisfying this filter will be considered.
  * 
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public interface FileFilter {
 

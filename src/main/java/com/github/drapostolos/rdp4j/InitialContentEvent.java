@@ -12,7 +12,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * The initial content of a directory are the files/directories 
  * it contains the first poll-cycle.
  *
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class InitialContentEvent extends AbstractDirectoryEvent{
 	private final Set<FileElement> files;

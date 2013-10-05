@@ -26,7 +26,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * 
  * </pre>
  * 
- * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User Guide</a>.
+ * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public class DirectoryPoller {
 	private static final long WITH_NO_DELAY = 0;
@@ -178,7 +178,7 @@ public class DirectoryPoller {
 	 * 
 	 * @throws NullPointerException if the given argument is null.
 	 */
-	public void addDirectory(PolledDirectory directory){
+	public void addPolledDirectory(PolledDirectory directory){
 		if(directory == null){
 			throw new NullPointerException("Argument is null.");
 		}
@@ -196,7 +196,7 @@ public class DirectoryPoller {
 	 * 
 	 * @throws NullPointerException if the given argument is null.
 	 */
-	public void removeDirectory(PolledDirectory directory){
+	public void removePolledDirectory(PolledDirectory directory){
 		if(directory == null){
 			throw new NullPointerException("Argument is null.");
 		}
