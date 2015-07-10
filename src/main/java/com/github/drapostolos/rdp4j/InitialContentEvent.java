@@ -1,6 +1,8 @@
 package com.github.drapostolos.rdp4j;
 
-import java.util.HashSet;
+import static com.github.drapostolos.rdp4j.Util.copyValuesToFileElementSet;
+
+import java.util.Map;
 import java.util.Set;
 
 import com.github.drapostolos.rdp4j.spi.FileElement;
@@ -15,19 +17,22 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class InitialContentEvent extends AbstractDirectoryEvent{
-	private final Set<FileElement> files;
 
-	InitialContentEvent(DirectoryPoller dp, PolledDirectory directory, Set<FileElement> files) {
+    private final Set<FileElement> copy;
+
+    InitialContentEvent(DirectoryPoller dp, PolledDirectory directory, Map<String, CachedFileElement> initialFiles) {
 		super(dp, directory);
-		this.files = files;
+        copy = copyValuesToFileElementSet(initialFiles);
 	}
 
 	/**
 	 * Returns a set of all {@link FileElement}s contained in a {@link PolledDirectory}
 	 * at startup.
 	 */
+    // TODO return the CachedFileElement instead? fix this when fixing :
+    // https://github.com/drapostolos/rdp4j/issues/2
 	public Set<FileElement> getFiles(){
-		return new HashSet<FileElement>(files);
+        return copy;
 	}
 
 }

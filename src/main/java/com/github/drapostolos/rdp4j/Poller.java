@@ -14,74 +14,98 @@ import org.slf4j.LoggerFactory;
 import com.github.drapostolos.rdp4j.spi.FileElement;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
-class Poller implements Callable<Object>{
-	private static Logger logger = LoggerFactory.getLogger(PollerTask.class);
-	private final Map<String, FileElementCacher> currentListedFiles = new LinkedHashMap<String, FileElementCacher>();
-	private final Map<String, FileElementCacher> previousListedFiles = new LinkedHashMap<String, FileElementCacher>();
-	private final List<FileElementCacher> modifiedFiles = new ArrayList<FileElementCacher>();
-	private final DirectoryPoller dp;
-	private final PolledDirectory directory;
+class Poller implements Callable<Object> {
+
+    private static Logger logger = LoggerFactory.getLogger(ScheduledRunnable.class);
+    private final List<CachedFileElement> modifiedFiles = new ArrayList<CachedFileElement>();
 	private final FileFilter filter;
 	private final ListenerNotifier notifier;
-	private final boolean fileAddedEventEnabledForInitialContent;
-	private boolean isSecondPollCycleOrLater = false;
-	private boolean isFilesystemUnaccessible = true;
-	private HashMapComparer<String, FileElementCacher> mapComparer;
+    private boolean isFirstPollCycle = true;
+	private boolean isFileSystemUnaccessible = true;
+    private HashMapComparer<String, CachedFileElement> mapComparer;
+    private final Map<String, CachedFileElement> currentListedFiles;
+    private final Map<String, CachedFileElement> previousListedFiles;
+    private final PolledDirectory directory;
+    private final DirectoryPoller dp;
 
-	Poller(DirectoryPoller dp, PolledDirectory directory) {
+    Poller(DirectoryPoller dp, PolledDirectory directory) {
+        this(dp, directory, Util.newLinkedHashMap(), Util.newLinkedHashMap());
+    }
+
+    /*
+     * Use this constructor when letting client provide snapshot of last poll,
+     * from a previous DirectoryPoller.
+     */
+    private Poller(DirectoryPoller dp, PolledDirectory directory,
+            Map<String, CachedFileElement> currentListedFiles,
+            Map<String, CachedFileElement> previousListedFiles) {
 		this.dp = dp;
 		this.directory = directory;
 		this.filter = dp.getDefaultFileFilter();
 		this.notifier = dp.notifier;
-		this.fileAddedEventEnabledForInitialContent = dp.fileAddedEventEnabledForInitialContent;
+        this.currentListedFiles = currentListedFiles;
+        this.previousListedFiles = previousListedFiles;
 	}
 
-	public Object call() {
-		listCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased();
+    @Override
+    public Object call() {
+		collectCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased();
 		if(isFilesystemAccessible()){
-			updateModifiedFiles();
+			detectAndCollectModifiedFiles();
 			setComparerForCurrentVersusPreviousListedFiles();
-			if(isDirectoryModified()){
-				if(isSecondPollCycleOrLater() || fileAddedEventEnabledForInitialContent){
-					notifyListenersWithRemovedAddedModifiedFiles();
-				}
-				copyCurrentListedFilesToPrevious();
-			}
-			if(isFirstPollCycle() ){
-				// Only do this once, i.e. the first time files are listed successfully. 
-				Set<FileElement> files = FileElementCacher.toFileElements(currentListedFiles);
-				notifier.notifyListeners(new InitialContentEvent(dp, directory, files));
-				isSecondPollCycleOrLater = true;
-			}
+            if (isFirstPollCycle) {
+                doActionsSpecificForFirstPollCycle();
+                isFirstPollCycle = false;
+            } else {
+                doActionsForRemainingPollCycles();
+            }
+            if (isDirectoryModified()) {
+                copyCurrentListedFilesToPrevious();
+            }
 		}
 		return null;
 	}
 
-	boolean isSecondPollCycleOrLater(){
-		return isSecondPollCycleOrLater;
-	}
-	boolean isFirstPollCycle(){
-		return !isSecondPollCycleOrLater();
-	}
+    private void doActionsSpecificForFirstPollCycle() {
+        if (dp.fileAddedEventEnabledForInitialContent) {
+            // make sure this events fires before InitialContentEvent
+            notifyListenersWithRemovedAddedModifiedFiles();
+        }
+        Event event = new InitialContentEvent(dp, directory, currentListedFiles);
+        dp.notifier.notifyListeners(event);
+    }
 
-	private void updateModifiedFiles() {
+    private void doActionsForRemainingPollCycles() {
+        notifyListenersWithRemovedAddedModifiedFiles();
+    }
+
+    private boolean isFilesystemAccessible() {
+        return isFileSystemUnaccessible;
+    }
+
+    private void setComparerForCurrentVersusPreviousListedFiles() {
+        mapComparer = new HashMapComparer<String, CachedFileElement>(previousListedFiles, currentListedFiles);
+    }
+
+	private void detectAndCollectModifiedFiles() {
 		modifiedFiles.clear();
-		for(FileElementCacher f : currentListedFiles.values()){
+        for (CachedFileElement f : currentListedFiles.values()) {
 			if(isFileModified(f)){
 				modifiedFiles.add(f);
 			}
 		}
 	}
-	private boolean isFileModified(FileElementCacher file) {
-		if(previousListedFiles.containsKey(file.name)){
-			long current = file.lastModified;
-			long previous = previousListedFiles.get(file.name).lastModified;
+
+    private boolean isFileModified(CachedFileElement file) {
+        if (previousListedFiles.containsKey(file.getName())) {
+            long current = file.lastModified();
+            long previous = previousListedFiles.get(file.getName()).lastModified();
 			return current != previous;
 		}
 		return false;
 	}
 
-	private void listCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased(){
+	private void collectCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased(){
 		try {
 			Set<FileElement> files = directory.listFiles();
 			if(files == null){
@@ -91,7 +115,7 @@ class Poller implements Callable<Object>{
 				.toString();
 				throw new IOException(String.format(message, directory));
 			}
-			Map<String, FileElementCacher> temp = new LinkedHashMap<String, FileElementCacher>();
+            Map<String, CachedFileElement> temp = new LinkedHashMap<String, CachedFileElement>();
 			for(FileElement file : files){
 				if(filter.accept(file)){
 					long lastModified = file.lastModified();
@@ -99,67 +123,57 @@ class Poller implements Callable<Object>{
 						throw new IOException("Unknown underlying IO-Error. Method 'lastModified()' returned '0L' for file '" + file + "'");
 					}
 					String name = file.getName();
-					temp.put(name, new FileElementCacher(file, name, lastModified));
+                    temp.put(name, new CachedFileElement(file, name, lastModified));
 				}
 			}
 			if(isFilesystemUnaccessible()){
 				notifier.notifyListeners(new IoErrorCeasedEvent(dp, directory));
-				isFilesystemUnaccessible = true;
+				isFileSystemUnaccessible = true;
 			}
 			currentListedFiles.clear();
 			currentListedFiles.putAll(temp);
 		} catch (IOException e) {
 			if(isFilesystemAccessible()){
-				isFilesystemUnaccessible = false;
+				isFileSystemUnaccessible = false;
 				notifier.notifyListeners(new IoErrorRaisedEvent(dp, directory, e));
 			}
 		} catch(DirectoryPollerException e){
 			// Silently wait fore next poll.
-		} catch (Throwable e){
-			dp.timer.cancel();
+        } catch (RuntimeException e) {
+            dp.stopAsync();
 			String message = 
-			"DirectoryPoller is stopped (effectively after current poll-cycle) "
+                    "DirectoryPoller will be stopped "
 			+ "due to unexpected crash in PolledDirectory implementation '%s'. "
-			+ "See underlying exception for more info.";
+                            + "See underlying exception for more information.";
 			message = String.format(message, directory.getClass().getName());
 			logger.error(message, e);
 			throw new IllegalStateException(message, e);
 		}
 	}
 
-	boolean isFilesystemAccessible(){
-		return isFilesystemUnaccessible;
-	}
-	boolean isFilesystemUnaccessible(){
+    private boolean isFilesystemUnaccessible() {
 		return !isFilesystemAccessible();
 	}
 
-	private void setComparerForCurrentVersusPreviousListedFiles(){
-		mapComparer = new HashMapComparer<String, FileElementCacher>(previousListedFiles, currentListedFiles);
-	}
-
-	private boolean isDirectoryModified() {
+    private boolean isDirectoryModified() {
 		return !modifiedFiles.isEmpty() || mapComparer.hasDiff();
 	}
 
-	private void notifyListenersWithRemovedAddedModifiedFiles(){
-		for(FileElementCacher file : mapComparer.getRemoved().values()){
+    private void notifyListenersWithRemovedAddedModifiedFiles() {
+        for (CachedFileElement file : mapComparer.getRemoved().values()) {
 			notifier.notifyListeners(new FileRemovedEvent(dp, directory, file.fileElement));
 		}
-
-		for(FileElementCacher file : mapComparer.getAdded().values()){
+        for (CachedFileElement file : mapComparer.getAdded().values()) {
 			notifier.notifyListeners(new FileAddedEvent(dp, directory, file.fileElement));
 		}
-		for(FileElementCacher file : modifiedFiles){
+        for (CachedFileElement file : modifiedFiles) {
 			notifier.notifyListeners(new FileModifiedEvent(dp, directory, file.fileElement));
 		}
 	}
 
-	private void copyCurrentListedFilesToPrevious(){
-		previousListedFiles.clear();
-		previousListedFiles.putAll(currentListedFiles);
-	}
-
-
+    private void copyCurrentListedFilesToPrevious() {
+        previousListedFiles.clear();
+        previousListedFiles.putAll(currentListedFiles);
+    }
 
 }

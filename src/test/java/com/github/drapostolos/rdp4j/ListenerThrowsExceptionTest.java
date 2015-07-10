@@ -27,10 +27,12 @@ public class ListenerThrowsExceptionTest {
 		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
 
 		// when
-		DirectoryPoller.newBuilder()
+        DirectoryPoller dp = DirectoryPoller.newBuilder()
 		.addListener(listenerMock)
 		.addPolledDirectory(directoryMock)
 		.start();
+
+        dp.stop();
 
 		// then
 		Mockito.verify(loggerMock).error(Mockito.anyString(), Mockito.any(Throwable.class));

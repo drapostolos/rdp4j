@@ -15,19 +15,19 @@ public interface DirectoryListener extends Rdp4jListener{
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void fileAdded(FileAddedEvent event);
+    void fileAdded(FileAddedEvent event) throws InterruptedException;
 
 	/**
 	 * Invoked each time a file is removed from the {@link PolledDirectory}.
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void fileRemoved(FileRemovedEvent event);
+    void fileRemoved(FileRemovedEvent event) throws InterruptedException;
 	
 	/**
 	 * Invoked each time a file in the {@link PolledDirectory} is modified.
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void fileModified(FileModifiedEvent event);
+    void fileModified(FileModifiedEvent event) throws InterruptedException;
 }

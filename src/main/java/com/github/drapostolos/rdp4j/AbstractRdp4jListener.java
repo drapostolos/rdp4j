@@ -16,42 +16,53 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  *
  */
-public class AbstractRdp4jListener implements DirectoryListener, IoErrorListener, DirectoryPollerListener, PollCycleListener, InitialContentListener{
+public abstract class AbstractRdp4jListener implements DirectoryListener, IoErrorListener, DirectoryPollerListener,
+        PollCycleListener, InitialContentListener {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRdp4jListener.class);
 
 	/**
-	 * Dummy implementation doing nothing.
-	 */
+     * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
+     */
 	@Override
-	public void beforeStart(BeforeStartEvent event) {
+    public void beforeStart(BeforeStartEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void afterStop(AfterStopEvent event) {
+    public void afterStop(AfterStopEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void beforePollingCycle(BeforePollingCycleEvent event) {
+    public void beforePollingCycle(BeforePollingCycleEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void afterPollingCycle(AfterPollingCycleEvent event) {
+    public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Logs any occurred I/O errors
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void ioErrorRaised(IoErrorRaisedEvent event) {
+    public void ioErrorRaised(IoErrorRaisedEvent event) throws InterruptedException {
 		String message = "I/O error raised when polling directory '%s'!"; 
 		PolledDirectory dir = event.getPolledDirectory();
 		IOException e = event.getIoException();
@@ -60,9 +71,11 @@ public class AbstractRdp4jListener implements DirectoryListener, IoErrorListener
 
 	/**
 	 * Logs when an I/O error has ceased.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void ioErrorCeased(IoErrorCeasedEvent event) {
+    public void ioErrorCeased(IoErrorCeasedEvent event) throws InterruptedException {
 		String message = "I/O error ceased when polling directory '%s'!"; 
 		PolledDirectory dir = event.getPolledDirectory();
 		logger.info(String.format(message, dir));
@@ -70,29 +83,37 @@ public class AbstractRdp4jListener implements DirectoryListener, IoErrorListener
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void initialContent(InitialContentEvent event) {
+    public void initialContent(InitialContentEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void fileAdded(FileAddedEvent event) {
+    public void fileAdded(FileAddedEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void fileRemoved(FileRemovedEvent event) {
+    public void fileRemoved(FileRemovedEvent event) throws InterruptedException {
 	}
 
 	/**
 	 * Dummy implementation doing nothing.
+     * 
+     * @throws InterruptedException
 	 */
 	@Override
-	public void fileModified(FileModifiedEvent event) {
+    public void fileModified(FileModifiedEvent event) throws InterruptedException {
 	}
 }

@@ -17,7 +17,7 @@ import org.mockito.stubbing.Answer;
 import com.github.drapostolos.rdp4j.spi.FileElement;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
-public class PollerTaskTest extends EventVerifier {
+public class ScheduledRunnableTest extends EventVerifier {
 
 	@Before
 	public void testFixture() throws Exception {
@@ -28,8 +28,8 @@ public class PollerTaskTest extends EventVerifier {
 		Mockito.when(directoryPollerMock.getDefaultFileFilter()).thenReturn(new DefaultFileFilter());
 		directories.add(directoryMock);
 		directoryPollerMock.directories = directories;
-		directoryPollerMock.notifier = new ListenerNotifier(new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
-		pollerTask = new PollerTask(directoryPollerMock);
+        directoryPollerMock.notifier = new ListenerNotifier(new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
+		pollerTask = new ScheduledRunnable(directoryPollerMock);
 	}
 	
 	@Test
@@ -37,7 +37,7 @@ public class PollerTaskTest extends EventVerifier {
 		// given 
 		// This will change the filter used by the PollerTask
 		Mockito.when(directoryPollerMock.getDefaultFileFilter()).thenReturn(new RegexFileFilter("file[AB]"));
-		pollerTask = new PollerTask(directoryPollerMock);
+		pollerTask = new ScheduledRunnable(directoryPollerMock);
 
 		Mockito.when(directoryMock.listFiles())
 		.thenReturn(list("fileA/1"))
@@ -66,7 +66,7 @@ public class PollerTaskTest extends EventVerifier {
 	}
 
 	@Test
-	public void addRemoveListers() throws Exception {
+    public void addRemoveListeners() throws Exception {
 		// given 
 		Mockito.when(directoryMock.listFiles())
 		.thenReturn(list("fileA/1"))

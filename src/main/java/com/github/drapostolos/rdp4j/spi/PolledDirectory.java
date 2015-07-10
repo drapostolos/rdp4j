@@ -16,35 +16,31 @@ import com.github.drapostolos.rdp4j.IoErrorRaisedEvent;
  */
 public interface PolledDirectory {
 	
-	/**
-	 * Returns a snapshot of the current content in this directory, i.e.
-	 * listing all {@link FileElement}s in this directory.
-	 * <p>
-	 * Returning a {@code null} value will be treated the same as if an 
-	 * {@link IOException} was thrown.
-	 * <p>
-	 * NOTE! </br>
-	 * All files within a directory are expected to have unique names (i.e. 
-	 * method {@link FileElement#getName()} is expected to return a name unique
-	 * among all files within this directory).
-	 * 
-	 * @return a list of {@link FileElement}s in this directory
-	 * 
-	 * @throws IOException if not possible to list files in this directory, due
-	 * to I/O error. Throwing {@link IOException} will fire a {@link IoErrorRaisedEvent}
-	 * event in {@link IoErrorListener#ioErrorRaised(IoErrorRaisedEvent)}.
-	 * 
-	 * 
-	 * @throws DirectoryPollerException For errors you don't want firing 
-	 * {@link IoErrorRaisedEvent} events for. This will cause the Directory-Poller 
-	 * to silently skip this poll-cycle and wait for next poll-cycle. In Other
-	 * words use this exception when you think it is possible to recover within
-	 * next coming poll-cycles (Keep a MaxRetries counter or similar in your implementation).
-	 * 
-	 * @throws Throwable if any unexpected crashes occurs. This will 
-	 * cause the Directory-Poller to log an error message (along with the causing 
-	 * {@link Throwable}) and stop the {@link DirectoryPoller}.
-	 */ 
+	    /**
+     * Returns a snapshot of the current content in this directory, i.e.
+     * listing all {@link FileElement}s in this directory.
+     * <p>
+     * Returning a {@code null} value will be treated the same as if an {@link IOException} was
+     * thrown.
+     * <p>
+     * NOTE! </br> All files within a directory are expected to have unique names (i.e. method
+     * {@link FileElement#getName()} is expected to return a name unique among all files within this
+     * directory).
+     * 
+     * @return a list of {@link FileElement}s in this directory
+     * @throws IOException if not possible to list files in this directory, due
+     *         to I/O error. Throwing {@link IOException} will fire a {@link IoErrorRaisedEvent}
+     *         event in {@link IoErrorListener#ioErrorRaised(IoErrorRaisedEvent)}.
+     * @throws DirectoryPollerException For errors you don't want firing {@link IoErrorRaisedEvent}
+     *         events for. This will cause the Directory-Poller
+     *         to silently skip this poll-cycle and wait for next poll-cycle. In Other
+     *         words use this exception when you think it is possible to recover within
+     *         next coming poll-cycles (Keep a MaxRetries counter or similar in your
+     *         implementation).
+     * @throws RuntimeException if any unexpected crashes occurs. This will
+     *         cause the Directory-Poller to log an error message (along with the causing
+     *         {@link RuntimeException}) and stop the {@link DirectoryPoller}.
+     */ 
 	Set<FileElement> listFiles() throws IOException;
 	
 	/**

@@ -13,7 +13,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(PollerTask.class)
+@PrepareForTest(ScheduledRunnable.class)
 public class ParallelPollerTest extends EventVerifier{
 
 	@Test
@@ -25,7 +25,7 @@ public class ParallelPollerTest extends EventVerifier{
 		dp.parallelDirectoryPollingEnabled = false;
 
 		// when
-		pollerTask = new PollerTask(dp);
+		pollerTask = new ScheduledRunnable(dp);
 		
 		// then
 		PowerMockito.verifyStatic();
@@ -41,7 +41,7 @@ public class ParallelPollerTest extends EventVerifier{
 		dp.parallelDirectoryPollingEnabled = true;
 
 		// when
-		pollerTask = new PollerTask(dp);
+		pollerTask = new ScheduledRunnable(dp);
 		
 		// then
 		PowerMockito.verifyStatic();

@@ -17,7 +17,7 @@ public interface IoErrorListener extends Rdp4jListener{
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void ioErrorRaised(IoErrorRaisedEvent event);
+    void ioErrorRaised(IoErrorRaisedEvent event) throws InterruptedException;
 	
 	/**
 	 * Invoked when the {@link DirectoryPoller} has recovered from an 
@@ -25,5 +25,5 @@ public interface IoErrorListener extends Rdp4jListener{
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void ioErrorCeased(IoErrorCeasedEvent event);
+    void ioErrorCeased(IoErrorCeasedEvent event) throws InterruptedException;
 }

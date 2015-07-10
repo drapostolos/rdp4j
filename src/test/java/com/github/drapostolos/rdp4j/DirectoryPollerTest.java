@@ -1,5 +1,11 @@
 package com.github.drapostolos.rdp4j;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -9,21 +15,56 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 public class DirectoryPollerTest {
 
+    private DirectoryPoller dp;
+    private DirectoryPollerBuilder builder;
+
 	@Rule public ExpectedException expectedEx = ExpectedException.none();
 	
+    @Before
+    public void testFixture() throws Exception {
+        builder = DirectoryPoller.newBuilder();
+    }
+
+    @After
+    public void cleanup() throws Exception {
+        if (dp != null) {
+            dp.stop();
+        }
+    }
+
 	@Test
-	public void shouldThrowExceptionWhenDirectoryNotSet() {
+    public void shouldThrowExceptionWhenNoPolledDirectorySetAtStart() {
 		expectedEx.expect(IllegalStateException.class);
-		expectedEx.expectMessage(String.format("Unable to build the '%s'", DirectoryPoller.class.getSimpleName()));
+        expectedEx.expectMessage(String.format("Unable to start the '%s'", DirectoryPoller.class.getSimpleName()));
 		expectedEx.expectMessage(String.format("%s.addDirectory(PolledDirectory)", DirectoryPollerBuilder.class.getSimpleName()));
 		DirectoryPoller.newBuilder().start();
 	}
+
+    @Test
+    public void shouldHaveSameNumberOfActiveThreadsBeforeStartAndAfterStop() throws Exception {
+        // given
+        PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
+        int numThreadsBefore = Thread.getAllStackTraces().size();
+
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock)
+                .setPollingInterval(1, TimeUnit.MILLISECONDS)
+                .addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(3))
+                .enableParallelPollingOfDirectories()
+                .start();
+        dp.awaitTermination();
+
+        //        TimeUnit.MILLISECONDS.sleep(50);
+        // then
+        assertThat(Thread.getAllStackTraces()).hasSize(numThreadsBefore);
+    }
 
 	@Test(expected = NullPointerException.class)
 	public void shouldThrowExceptionWhenAddingDirectoryThatIsNull() {
 		// given
 		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
-		DirectoryPoller dp = DirectoryPoller.newBuilder()
+        dp = builder
 				.addPolledDirectory(directoryMock)
 				.start();
 		
@@ -35,7 +76,7 @@ public class DirectoryPollerTest {
 	public void removeNullDirectory() {
 		// given
 		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
-		DirectoryPoller dp = DirectoryPoller.newBuilder()
+        dp = builder
 				.addPolledDirectory(directoryMock)
 				.start();
 		
@@ -47,7 +88,7 @@ public class DirectoryPollerTest {
 	public void addNullListener() {
 		// given
 		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
-		DirectoryPoller dp = DirectoryPoller.newBuilder()
+        dp = builder
 				.addPolledDirectory(directoryMock)
 				.start();
 		
@@ -59,7 +100,7 @@ public class DirectoryPollerTest {
 	public void removeNullListener() {
 		// given
 		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
-		DirectoryPoller dp = DirectoryPoller.newBuilder()
+        dp = builder
 				.addPolledDirectory(directoryMock)
 				.start();
 		

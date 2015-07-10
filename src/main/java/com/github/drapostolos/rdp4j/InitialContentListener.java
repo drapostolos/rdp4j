@@ -11,6 +11,6 @@ public interface InitialContentListener extends Rdp4jListener{
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void initialContent(InitialContentEvent event);
+    void initialContent(InitialContentEvent event) throws InterruptedException;
 
 }

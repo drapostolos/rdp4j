@@ -3,6 +3,8 @@ package com.github.drapostolos.rdp4j;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.github.drapostolos.rdp4j.spi.FileElement;
@@ -16,7 +18,6 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 public final class DirectoryPollerBuilder {
 	private static final String NULL_ARGUMENT_ERROR_MESSAGE = "null argument not allowed!";
-	private DirectoryPoller dp;
 	static final String DEFAULT_THREAD_NAME = "DirectoryPoller-";
 	Set<PolledDirectory> directories = new LinkedHashSet<PolledDirectory>();
 	
@@ -85,21 +86,19 @@ public final class DirectoryPollerBuilder {
 	}
 
 	/**
-	 * Set the interval between each poll cycle. Optional parameter. 
-	 * Default value is 1000 milliseconds.
-	 * 
-	 * @param interval - the interval between two poll-cycles.
-	 * @param unit - the unit of the interval. Example: TimeUnit.MINUTES
-	 * 
-	 * @return {@link DirectoryPollerBuilder}
-	 * 
-	 * @throws IllegalArgumentException if <code>interval</code> is negative.
-	 */
-	public DirectoryPollerBuilder setPollingInterval(long interval, TimeUnit unit) {
-		if(interval < 0){
+     * Set the interval between each poll cycle. Optional parameter.
+     * Default value is 1000 milliseconds.
+     * 
+     * @param interval - the interval between two poll-cycles.
+     * @param timeUnit - the unit of the interval. Example: TimeUnit.MINUTES
+     * @return {@link DirectoryPollerBuilder}
+     * @throws IllegalArgumentException if <code>interval</code> is negative.
+     */
+    public DirectoryPollerBuilder setPollingInterval(long interval, TimeUnit timeUnit) {
+        if (interval < 0) {
 			throw new IllegalArgumentException("Argument 'interval' is negative: " + interval);
 		}
-		pollingIntervalInMillis = unit.toMillis(interval);
+        pollingIntervalInMillis = timeUnit.toMillis(interval);
 		return this;
 	}
 
@@ -178,9 +177,34 @@ public final class DirectoryPollerBuilder {
 	 * 
 	 */
 	public DirectoryPoller start() {
-		dp = new DirectoryPoller(this);
-		dp.notifier.notifyListeners(new BeforeStartEvent(dp));
-		dp.start();
-		return dp;
+        return future().get();
 	}
+
+    /**
+     * Asynchronously starts the poll-cycle mechanism.
+     * <p>
+     * To get a hold of the {@link DirectoryPoller} instance, call the get method on the returned
+     * {@link DirectoryPollerFuture} instance.
+     * 
+     * @return {@link DirectoryPollerFuture}.
+     */
+    public DirectoryPollerFuture startAsync() {
+        return future();
+    }
+
+    private DirectoryPollerFuture future(){
+        final DirectoryPoller dp = new DirectoryPoller(this);
+
+        Future<DirectoryPoller> f = Util.invokeTask("DP-BeforeStart", new Callable<DirectoryPoller>() {
+
+            @Override
+            public DirectoryPoller call() {
+                dp.notifier.notifyListeners(new BeforeStartEvent(dp));
+                dp.start();
+                return dp;
+            }
+
+        });
+        return new DirectoryPollerFuture(f);
+    }
 }

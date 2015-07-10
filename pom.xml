@@ -1,13 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<url>http://maven.apache.org</url>
 	<groupId>com.github.drapostolos</groupId>
 	<artifactId>rdp4j</artifactId>
 	<name>rdp4j</name>
 	<version>0.0.9-SNAPSHOT</version>
 	<packaging>jar</packaging>
+	<description>This library provides a Java SPI for polling directories on a REMOTE filesystem.</description>
 
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,6 +45,12 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>1.6.0</version>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.easytesting</groupId>
 			<artifactId>fest-assert-core</artifactId>
@@ -186,7 +193,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<description>This library provides a Java SPI for polling directories on a REMOTE filesystem.</description>
 	<licenses>
 		<license>
 			<name>The MIT License (MIT)</name>

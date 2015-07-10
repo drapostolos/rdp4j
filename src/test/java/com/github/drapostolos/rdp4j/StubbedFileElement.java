@@ -7,11 +7,11 @@ import com.github.drapostolos.rdp4j.spi.FileElement;
 /*
  * Make a stub so equals/hashCode methods can be implemented correctly.
  */
-public class StubbedFileObject implements FileElement{
+public class StubbedFileElement implements FileElement{
 	private final String name;
 	private final long lastModified;
 	
-	public StubbedFileObject(String name, long lastModified) {
+	public StubbedFileElement(String name, long lastModified) {
 		this.name = name;
 		this.lastModified = lastModified;
 	}
@@ -42,7 +42,7 @@ public class StubbedFileObject implements FileElement{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		StubbedFileObject other = (StubbedFileObject) obj;
+		StubbedFileElement other = (StubbedFileElement) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;

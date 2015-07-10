@@ -1,6 +1,5 @@
 package com.github.drapostolos.rdp4j;
 
-import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -12,7 +11,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 class EventVerifier {
 
-	protected PollerTask pollerTask;
+	protected ScheduledRunnable pollerTask;
 	protected AbstractRdp4jListener listenerMock;
 	protected InOrder inOrder;
 	protected Set<PolledDirectory> directories = new LinkedHashSet<PolledDirectory>();
@@ -29,45 +28,33 @@ class EventVerifier {
 	 * Dispatch event to the "verifyInOrder_" methods below.
 	 */
 	protected void verifyEventsInOrder(Class<?>... events) throws Exception {
-		for(Class<?> event : events){
-			Method m = getClass().getMethod("verifyInOrder_" + event.getSimpleName());
-			m.invoke(this);
-		}
+        for (Class<?> event : events) {
+            if (event.equals(InitialContentEvent.class)) {
+                inOrder.verify(listenerMock).initialContent(Mockito.any(InitialContentEvent.class));
+            } else if (event.equals(BeforePollingCycleEvent.class)) {
+                inOrder.verify(listenerMock).beforePollingCycle(Mockito.any(BeforePollingCycleEvent.class));
+            } else if (event.equals(AfterPollingCycleEvent.class)) {
+                inOrder.verify(listenerMock).afterPollingCycle(Mockito.any(AfterPollingCycleEvent.class));
+            } else if (event.equals(FileAddedEvent.class)) {
+                inOrder.verify(listenerMock).fileAdded(Mockito.any(FileAddedEvent.class));
+            } else if (event.equals(FileRemovedEvent.class)) {
+                inOrder.verify(listenerMock).fileRemoved(Mockito.any(FileRemovedEvent.class));
+            } else if (event.equals(FileModifiedEvent.class)) {
+                inOrder.verify(listenerMock).fileModified(Mockito.any(FileModifiedEvent.class));
+            } else if (event.equals(IoErrorCeasedEvent.class)) {
+                inOrder.verify(listenerMock).ioErrorCeased(Mockito.any(IoErrorCeasedEvent.class));
+            } else if (event.equals(IoErrorRaisedEvent.class)) {
+                inOrder.verify(listenerMock).ioErrorRaised(Mockito.any(IoErrorRaisedEvent.class));
+            } else if (event.equals(BeforeStartEvent.class)) {
+                inOrder.verify(listenerMock).beforeStart(Mockito.any(BeforeStartEvent.class));
+            } else if (event.equals(AfterStopEvent.class)) {
+                inOrder.verify(listenerMock).afterStop(Mockito.any(AfterStopEvent.class));
+            } else {
+                throw new RuntimeException("Missing event in When verifying order: " + event);
+            }
+        }
 	}
 
-	public void verifyInOrder_InitialContentEvent() {
-		inOrder.verify(listenerMock).initialContent(Mockito.any(InitialContentEvent.class));
-	}
-	public void verifyInOrder_BeforePollingCycleEvent() {
-		inOrder.verify(listenerMock).beforePollingCycle(Mockito.any(BeforePollingCycleEvent.class));
-	}
-	public void verifyInOrder_AfterPollingCycleEvent() {
-		inOrder.verify(listenerMock).afterPollingCycle(Mockito.any(AfterPollingCycleEvent.class));
-	}
-
-	public void verifyInOrder_FileAddedEvent() {
-		inOrder.verify(listenerMock).fileAdded(Mockito.any(FileAddedEvent.class));
-	}
-	public void verifyInOrder_FileRemovedEvent() {
-		inOrder.verify(listenerMock).fileRemoved(Mockito.any(FileRemovedEvent.class));
-	}
-	public void verifyInOrder_FileModifiedEvent() {
-		inOrder.verify(listenerMock).fileModified(Mockito.any(FileModifiedEvent.class));
-	}
-
-	public void verifyInOrder_IoErrorCeasedEvent() {
-		inOrder.verify(listenerMock).ioErrorCeased(Mockito.any(IoErrorCeasedEvent.class));
-	}
-	public void verifyInOrder_IoErrorRaisedEvent() {
-		inOrder.verify(listenerMock).ioErrorRaised(Mockito.any(IoErrorRaisedEvent.class));
-	}
-
-	public void verifyInOrder_BeforeStartEvent() {
-		inOrder.verify(listenerMock).beforeStart(Mockito.any(BeforeStartEvent.class));
-	}
-	public void verifyInOrder_AfterStopEvent() {
-		inOrder.verify(listenerMock).afterStop(Mockito.any(AfterStopEvent.class));
-	}
 
 	/*
 	 * input argument is in the form: "file-name/lastModified"
@@ -79,10 +66,14 @@ class EventVerifier {
 			String[] t = nameAndTime.split("/");
 			String fileName = t[0];
 			long lastModified = Long.parseLong(t[1]);
-			FileElement file = new StubbedFileObject(fileName, lastModified);
+			FileElement file = new StubbedFileElement(fileName, lastModified);
 			result.add(file);
 		}
 		return result;
 	}
+
+    public FileElement[] array(String... files) throws Exception {
+        return list(files).toArray(new StubbedFileElement[0]);
+    }
 
 }

@@ -5,10 +5,10 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,22 +21,23 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * directory in question and notify listeners if files are added/removed/modified,
  * or if IO Error has been raised/ceased.
  */
-final class PollerTask extends TimerTask {
-	private static Logger logger = LoggerFactory.getLogger(PollerTask.class);
+final class ScheduledRunnable implements Runnable {
+
+    private static Logger logger = LoggerFactory.getLogger(ScheduledRunnable.class);
 	private final DirectoryPoller dp;
-	private final Map<PolledDirectory, Poller> pollers = new LinkedHashMap<PolledDirectory, Poller>();
+    private final Map<PolledDirectory, Poller> pollers = new LinkedHashMap<PolledDirectory, Poller>();
 	private final ListenerNotifier notifier;
 	private Queue<Rdp4jListener> listenersToRemove = new ConcurrentLinkedQueue<Rdp4jListener>();
 	private Queue<Rdp4jListener> listenersToAdd = new ConcurrentLinkedQueue<Rdp4jListener>();
 	private Queue<PolledDirectory> directoriesToAdd = new ConcurrentLinkedQueue<PolledDirectory>();
 	private Queue<PolledDirectory> directoriesToRemove = new ConcurrentLinkedQueue<PolledDirectory>();;
-	final ExecutorService executor;
+    private final ExecutorService executor;
 
-	PollerTask(DirectoryPoller directoryPoller) {
+	ScheduledRunnable(DirectoryPoller directoryPoller) {
 		dp = directoryPoller;
 		this.notifier = dp.notifier;
 		for(PolledDirectory directory : dp.directories){
-			pollers.put(directory, new Poller(directoryPoller, directory));
+            pollers.put(directory, new Poller(dp, directory));
 		}
 		if(dp.parallelDirectoryPollingEnabled){
 			executor = Executors.newCachedThreadPool();
@@ -45,35 +46,38 @@ final class PollerTask extends TimerTask {
 		}
 	}
 
-	/**
-	 * This method is periodically called by the {@link java.util.Timer} instance.
-	 */
-	public synchronized void run(){
-		addRemoveListeners();
-		addRemoveDirectories();
-		notifier.notifyListeners(new BeforePollingCycleEvent(dp));
-		try {
-			executor.invokeAll(pollers.values());
-		} catch (InterruptedException e) {
-			logger.error(
-					"Internal poller thread of the {} was interrupted. " +
-					"Interruption is ignored! To stop the {} call its stop() " +
-					"method: {}.stop().",
-					DirectoryPoller.class.getSimpleName(),
-					DirectoryPoller.class.getSimpleName(),
-					DirectoryPoller.class.getSimpleName()
-					);
-		}
-		notifier.notifyListeners(new AfterPollingCycleEvent(dp));
-		addRemoveListeners();
-		addRemoveDirectories();
+    /**
+     * This method is periodically called by the {@link ExecutorService}.
+     */
+	@Override
+    public synchronized void run() {
+        try {
+            addRemoveListeners();
+            addRemoveDirectories();
+
+            notifier.notifyListeners(new BeforePollingCycleEvent(dp));
+            try {
+                if (!executor.isShutdown()) {
+                    executor.invokeAll(pollers.values());
+                }
+            } catch (InterruptedException e) {
+                // ignore and let poll-cycle finish.
+            } catch (RejectedExecutionException e) {
+                // ignore and let poll-cycle finish.
+            }
+            notifier.notifyListeners(new AfterPollingCycleEvent(dp));
+            addRemoveListeners();
+            addRemoveDirectories();
+        } catch (Throwable t) {
+            logger.error("Unexpected error!", t);
+        }
 	}
 
 	private void addRemoveDirectories() {
 		PolledDirectory directory;
 		while((directory = directoriesToAdd.poll()) != null){
 			if(!pollers.containsKey(directory)){
-				pollers.put(directory, new Poller(dp, directory));
+                pollers.put(directory, new Poller(dp, directory));
 			}
 		}
 		while((directory = directoriesToRemove.poll()) != null){
@@ -84,7 +88,7 @@ final class PollerTask extends TimerTask {
 	private void addRemoveListeners() {
 		Rdp4jListener listener;
 		while((listener = listenersToAdd.poll()) != null){
-			notifier.addListener(listener);
+            notifier.addListener(listener);
 		}
 		while((listener = listenersToRemove.poll()) != null){
 			notifier.removeListener(listener);
@@ -108,16 +112,15 @@ final class PollerTask extends TimerTask {
 	}
 
 
-	synchronized void waitForExecutionToStop() {
-		/*
-		 * This method is called after the Timer has been canceled.
-		 * If there is an ongoing poll while timer is canceled, this
-		 * method will block until the last poll has finished executing
-		 * (since both this and the run() methods are synchronized).
-		 */
-	}
+    void shutdown() {
+        executor.shutdown();
+    }
 
-	synchronized Set<PolledDirectory> getDirectories() {
+    void awaitTermination() {
+        Util.awaitTermination(executor);
+    }
+
+    synchronized Set<PolledDirectory> getDirectories() {
 		return new LinkedHashSet<PolledDirectory>(pollers.keySet());
 	}
 

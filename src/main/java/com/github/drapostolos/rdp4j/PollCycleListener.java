@@ -13,13 +13,13 @@ public interface PollCycleListener extends Rdp4jListener{
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void beforePollingCycle(BeforePollingCycleEvent event);
+    void beforePollingCycle(BeforePollingCycleEvent event) throws InterruptedException;
 
 	/**
 	 * Invoked after each poll-cycle end.
 	 * 
 	 * @param event provided by the {@link DirectoryPoller}.
 	 */
-	void afterPollingCycle(AfterPollingCycleEvent event);
+    void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException;
 
 }
