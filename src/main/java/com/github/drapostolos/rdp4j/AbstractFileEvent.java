@@ -12,9 +12,8 @@ abstract class AbstractFileEvent extends AbstractDirectoryEvent{
 	}
 	
 	/**
-	 * 
-	 * Return the {@link FileElement} triggering this event.
-	 */
+     * @return the {@link FileElement} triggering this event.
+     */
 	public FileElement getFileElement() {
 		return file;
 	}

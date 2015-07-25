@@ -23,7 +23,8 @@ public interface PolledDirectory {
      * Returning a {@code null} value will be treated the same as if an {@link IOException} was
      * thrown.
      * <p>
-     * NOTE! </br> All files within a directory are expected to have unique names (i.e. method
+     * NOTE! <br>
+     * All files within a directory are expected to have unique names (i.e. method
      * {@link FileElement#getName()} is expected to return a name unique among all files within this
      * directory).
      * 
@@ -44,11 +45,11 @@ public interface PolledDirectory {
 	Set<FileElement> listFiles() throws IOException;
 	
 	/**
-	 * It is recommended to implement this method if clients wants to remove this
-	 * {@link PolledDirectory} from the {@link DirectoryPoller}.
-	 * 
-	 * @param obj
-	 */
+     * It is recommended to implement this method if clients wants to remove this
+     * {@link PolledDirectory} from the {@link DirectoryPoller}.
+     * 
+     * @param obj Object to compare.
+     */
 	@Override
 	public boolean equals(Object obj);
 	

@@ -13,10 +13,10 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 public interface FileFilter {
 
 	/**
-	 * Return true if the given <code>file</code> is accepted by this filter,
-	 * otherwise returns false.
-	 * @param file 
-	 */
-    boolean accept(FileElement file);
+     * @return true if the given <code>file</code> is accepted by this filter,
+     *         otherwise returns false.
+     * @param fileElement to filter.
+     */
+    boolean accept(FileElement fileElement);
 
 }

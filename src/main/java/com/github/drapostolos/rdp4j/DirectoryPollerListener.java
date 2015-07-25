@@ -14,19 +14,22 @@ package com.github.drapostolos.rdp4j;
 public interface DirectoryPollerListener extends Rdp4jListener{
 
 	/**
-	 * Invoked once before the {@link DirectoryPoller} is started.
-	 * <p>
-	 * NOTE! Only listeners added through this method {@link DirectoryPollerBuilder#addListener(Rdp4jListener)}
-	 * will receive {@link BeforeStartEvent} events. 
-	 * 
-	 * @param event provided by the {@link DirectoryPoller}.
-	 */
+     * Invoked once before the {@link DirectoryPoller} is started.
+     * <p>
+     * NOTE! Only listeners added through this method
+     * {@link DirectoryPollerBuilder#addListener(Rdp4jListener)}
+     * will receive {@link BeforeStartEvent} events.
+     * 
+     * @param event provided by the {@link DirectoryPoller}.
+     * @throws InterruptedException when interrupted.
+     */
     void beforeStart(BeforeStartEvent event) throws InterruptedException;
 	
 	/**
-	 * Invoked once after the {@link DirectoryPoller} is stopped.
-	 * 
-	 * @param event provided by the {@link DirectoryPoller}.
-	 */
+     * Invoked once after the {@link DirectoryPoller} is stopped.
+     * 
+     * @param event provided by the {@link DirectoryPoller}.
+     * @throws InterruptedException when interrupted.
+     */
     void afterStop(AfterStopEvent event) throws InterruptedException;
 }

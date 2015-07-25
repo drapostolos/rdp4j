@@ -6,11 +6,13 @@ package com.github.drapostolos.rdp4j;
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public interface InitialContentListener extends Rdp4jListener{
-	/**
-	 * Invoked once during the first poll-cycle of the {@link DirectoryPoller}.
-	 * 
-	 * @param event provided by the {@link DirectoryPoller}.
-	 */
+	
+    /**
+     * Invoked once during the first poll-cycle of the {@link DirectoryPoller}.
+     * 
+     * @param event provided by the {@link DirectoryPoller}.
+     * @throws InterruptedException when interrupted.
+     */
     void initialContent(InitialContentEvent event) throws InterruptedException;
 
 }

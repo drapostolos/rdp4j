@@ -54,7 +54,7 @@ public class DirectoryPoller {
     Set<PolledDirectory> directories;
 
     /**
-     * Returns a new {@link DirectoryPollerBuilder}.
+     * @return a new {@link DirectoryPollerBuilder}.
      */
     public static DirectoryPollerBuilder newBuilder() {
         return new DirectoryPollerBuilder();
@@ -212,24 +212,24 @@ public class DirectoryPoller {
     }
 
     /**
-     * Returns the current {@link PolledDirectory}'s handled by
-     * this instance.
+     * @return the current {@link PolledDirectory}'s handled by
+     *         this instance.
      */
     public Set<PolledDirectory> getPolledDirectories() {
         return scheduledRunnable.getDirectories();
     }
 
     /**
-     * Returns the polling interval in milliseconds, as
-     * configured for this instance
+     * @return the polling interval in milliseconds, as
+     *         configured for this instance
      */
     public long getPollingIntervalInMillis() {
         return pollingIntervalInMillis;
     }
 
     /**
-     * Returns the default {@link FileFilter}, as configured for this
-     * instance.
+     * @return the default {@link FileFilter}, as configured for this
+     *         instance.
      */
     public FileFilter getDefaultFileFilter() {
         return filter;
@@ -325,29 +325,29 @@ public class DirectoryPoller {
     }
 
     /**
-     * Returns the name of the associated polling thread.
+     * @return the name of the associated polling thread.
      */
     public String getThreadName() {
         return threadName;
     }
 
     /**
-     * Returns <code>true</code> if this {@link DirectoryPoller} has
-     * been configured to poll its directories in parallel, otherwise
-     * return false.
+     * @return <code>true</code> if this {@link DirectoryPoller} has
+     *         been configured to poll its directories in parallel, otherwise
+     *         return false.
      */
     public boolean isParallelDirectoryPollingEnabled() {
         return parallelDirectoryPollingEnabled;
     }
 
     /**
-     * Returns <code>true</code> if this {@link DirectoryPoller} has
-     * been configured to notify {@link DirectoryListener#fileAdded(FileAddedEvent)}
-     * method for the initial content of its directories, otherwise
-     * returns false.
-     * <p>
-     * The initial content of a directory are the files/directories
-     * it contains the first poll-cycle.
+     * @return <code>true</code> if this {@link DirectoryPoller} has
+     *         been configured to notify {@link DirectoryListener#fileAdded(FileAddedEvent)}
+     *         method for the initial content of its directories, otherwise
+     *         returns false.
+     *         <p>
+     *         The initial content of a directory are the files/directories
+     *         it contains the first poll-cycle.
      */
     public boolean isFileAdedEventForInitialContentEnabled() {
         return fileAddedEventEnabledForInitialContent;

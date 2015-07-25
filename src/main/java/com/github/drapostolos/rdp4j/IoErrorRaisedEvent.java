@@ -18,8 +18,8 @@ public final class IoErrorRaisedEvent extends AbstractDirectoryEvent {
 	}
 	
 	/**
-	 * Returns the {@link IOException} that caused this event.
-	 */
+     * @return the {@link IOException} that caused this event.
+     */
 	public IOException getIoException() {
 		return ioException;
 	}

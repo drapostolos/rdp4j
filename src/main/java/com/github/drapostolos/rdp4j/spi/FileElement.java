@@ -52,7 +52,8 @@ public interface FileElement {
     /**
      * Returns the name of this {@link FileElement}.
      * <p>
-     * NOTE! </br> All files within a directory are expected to have unique names.
+     * NOTE! <br>
+     * All files within a directory are expected to have unique names.
      * 
      * @return name of {@link FileElement}.
      * @throws DirectoryPollerException For errors you don't want firing {@link IoErrorRaisedEvent}

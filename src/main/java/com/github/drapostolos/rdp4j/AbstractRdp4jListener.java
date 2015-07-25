@@ -23,44 +23,44 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
 	/**
      * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
+     * @throws InterruptedException when interrupted.
      */
 	@Override
     public void beforeStart(BeforeStartEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void afterStop(AfterStopEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void beforePollingCycle(BeforePollingCycleEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Logs any occurred I/O errors
+     * Logs any occurred I/O errors
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void ioErrorRaised(IoErrorRaisedEvent event) throws InterruptedException {
 		String message = "I/O error raised when polling directory '%s'!"; 
@@ -70,10 +70,10 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
 	}
 
 	/**
-	 * Logs when an I/O error has ceased.
+     * Logs when an I/O error has ceased.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void ioErrorCeased(IoErrorCeasedEvent event) throws InterruptedException {
 		String message = "I/O error ceased when polling directory '%s'!"; 
@@ -82,37 +82,37 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void initialContent(InitialContentEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void fileAdded(FileAddedEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void fileRemoved(FileRemovedEvent event) throws InterruptedException {
 	}
 
 	/**
-	 * Dummy implementation doing nothing.
+     * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException
-	 */
+     * @throws InterruptedException when interrupted.
+     */
 	@Override
     public void fileModified(FileModifiedEvent event) throws InterruptedException {
 	}

@@ -26,9 +26,9 @@ public final class InitialContentEvent extends AbstractDirectoryEvent{
 	}
 
 	/**
-	 * Returns a set of all {@link FileElement}s contained in a {@link PolledDirectory}
-	 * at startup.
-	 */
+     * @return a set of all {@link FileElement}s contained in a {@link PolledDirectory}
+     *         at startup.
+     */
     // TODO return the CachedFileElement instead? fix this when fixing :
     // https://github.com/drapostolos/rdp4j/issues/2
 	public Set<FileElement> getFiles(){
