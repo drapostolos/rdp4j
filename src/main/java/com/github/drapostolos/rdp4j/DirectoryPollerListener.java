@@ -23,7 +23,7 @@ public interface DirectoryPollerListener extends Rdp4jListener{
      * @param event provided by the {@link DirectoryPoller}.
      * @throws InterruptedException when interrupted.
      */
-    void beforeStart(BeforeStartEvent event) throws InterruptedException;
+    void beforeStart(BeforeStartEvent event);
 	
 	/**
      * Invoked once after the {@link DirectoryPoller} is stopped.
@@ -31,5 +31,5 @@ public interface DirectoryPollerListener extends Rdp4jListener{
      * @param event provided by the {@link DirectoryPoller}.
      * @throws InterruptedException when interrupted.
      */
-    void afterStop(AfterStopEvent event) throws InterruptedException;
+    void afterStop(AfterStopEvent event);
 }

@@ -46,7 +46,6 @@ final class Util {
                 executor.awaitTermination(MAX_VALUE, DAYS);
                 return;
             } catch (InterruptedException e) {
-                // This will never happen.
                 logger.warn("Thread interrupted, but ignored.");
             }
         }

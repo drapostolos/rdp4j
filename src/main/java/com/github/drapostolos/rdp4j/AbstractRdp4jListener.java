@@ -26,7 +26,7 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
      * @throws InterruptedException when interrupted.
      */
 	@Override
-    public void beforeStart(BeforeStartEvent event) throws InterruptedException {
+    public void beforeStart(BeforeStartEvent event) {
 	}
 
 	/**
@@ -35,7 +35,7 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
      * @throws InterruptedException when interrupted.
      */
 	@Override
-    public void afterStop(AfterStopEvent event) throws InterruptedException {
+    public void afterStop(AfterStopEvent event) {
 	}
 
 	/**

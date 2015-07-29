@@ -48,7 +48,7 @@ class Poller implements Callable<Object> {
 	}
 
     @Override
-    public Object call() {
+    public Object call() throws InterruptedException {
 		collectCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased();
 		if(isFilesystemAccessible()){
 			detectAndCollectModifiedFiles();
@@ -66,7 +66,7 @@ class Poller implements Callable<Object> {
 		return null;
 	}
 
-    private void doActionsSpecificForFirstPollCycle() {
+    private void doActionsSpecificForFirstPollCycle() throws InterruptedException {
         if (dp.fileAddedEventEnabledForInitialContent) {
             // make sure this events fires before InitialContentEvent
             notifyListenersWithRemovedAddedModifiedFiles();
@@ -75,7 +75,7 @@ class Poller implements Callable<Object> {
         dp.notifier.notifyListeners(event);
     }
 
-    private void doActionsForRemainingPollCycles() {
+    private void doActionsForRemainingPollCycles() throws InterruptedException {
         notifyListenersWithRemovedAddedModifiedFiles();
     }
 
@@ -105,7 +105,7 @@ class Poller implements Callable<Object> {
 		return false;
 	}
 
-	private void collectCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased(){
+    private void collectCurrentFilesAndNotifyListenersIfIoErrorRaisedOrCeased() throws InterruptedException {
 		try {
 			Set<FileElement> files = directory.listFiles();
 			if(files == null){
@@ -159,7 +159,7 @@ class Poller implements Callable<Object> {
 		return !modifiedFiles.isEmpty() || mapComparer.hasDiff();
 	}
 
-    private void notifyListenersWithRemovedAddedModifiedFiles() {
+    private void notifyListenersWithRemovedAddedModifiedFiles() throws InterruptedException {
         for (CachedFileElement file : mapComparer.getRemoved().values()) {
 			notifier.notifyListeners(new FileRemovedEvent(dp, directory, file.fileElement));
 		}

@@ -181,7 +181,11 @@ public class DirectoryPoller {
                     Util.awaitTermination(executor);
                     scheduledRunnable.shutdown();
                     scheduledRunnable.awaitTermination();
-                    notifier.notifyListeners(new AfterStopEvent(dp));
+                    try {
+                        notifier.notifyListeners(new AfterStopEvent(dp));
+                    } catch (InterruptedException e) {
+                        // ignore for now.
+                    }
                     latch.countDown();
                     return null;
                 }

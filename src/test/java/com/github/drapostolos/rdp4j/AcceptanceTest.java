@@ -1,6 +1,7 @@
 package com.github.drapostolos.rdp4j;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -42,9 +43,87 @@ public class AcceptanceTest extends EventVerifier {
     }
 
     @Test(timeout = 1000)
-    public void canInterruptWhenProcessingAddedFileEvent() throws Exception {
+    public void canInterruptBeforePollingCycle() throws Exception {
 
         // given 
+        final StringBuffer checker = new StringBuffer();
+        final CountDownLatch latch = new CountDownLatch(1);
+        Mockito.when(directoryMock.listFiles())
+                .thenReturn(list("file1.txt/1"));
+
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock)
+                .addListener(new AbstractRdp4jListener() {
+
+                    @Override
+                    public void beforePollingCycle(BeforePollingCycleEvent event) throws InterruptedException {
+                        latch.countDown();
+                        SECONDS.sleep(5);
+                    }
+
+                    @Override
+                    public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
+                        checker.append("X"); // this should not be called.
+                    }
+
+                    @Override
+                    public void afterStop(AfterStopEvent event) {
+                        checker.append("PASS");
+                    }
+                })
+                .enableFileAddedEventsForInitialContent()
+                .setPollingInterval(10, TimeUnit.MILLISECONDS)
+                .start();
+
+        // then
+        latch.await();
+        dp.stopNow();
+
+        assertThat(checker.toString()).isEqualTo("PASS");
+    }
+
+    @Test(timeout = 1000)
+    public void canInterruptAfterPollingCycle() throws Exception {
+
+        // given 
+        final StringBuffer checker = new StringBuffer();
+        final CountDownLatch latch = new CountDownLatch(1);
+        Mockito.when(directoryMock.listFiles())
+                .thenReturn(list("file1.txt/1"));
+
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock)
+                .addListener(new AbstractRdp4jListener() {
+
+                    @Override
+                    public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
+                        latch.countDown();
+                        SECONDS.sleep(5);
+                    }
+
+                    @Override
+                    public void afterStop(AfterStopEvent event) {
+                        checker.append("PASS");
+                    }
+                })
+                .enableFileAddedEventsForInitialContent()
+                .setPollingInterval(10, TimeUnit.MILLISECONDS)
+                .start();
+
+        // then
+        latch.await();
+        dp.stopNow();
+
+        assertThat(checker.toString()).isEqualTo("PASS");
+    }
+
+    @Test(timeout = 1000)
+    public void canInterruptFileAddedEvent() throws Exception {
+
+        // given 
+        final StringBuffer checker = new StringBuffer();
         final CountDownLatch latch = new CountDownLatch(1);
         Mockito.when(directoryMock.listFiles())
                 .thenReturn(list("file1.txt/1"));
@@ -57,9 +136,18 @@ public class AcceptanceTest extends EventVerifier {
                     @Override
                     public void fileAdded(FileAddedEvent event) throws InterruptedException {
                         latch.countDown();
-                        TimeUnit.SECONDS.sleep(10);
+                        SECONDS.sleep(5);
                     }
 
+                    @Override
+                    public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
+                        checker.append("X"); // this should not be called.
+                    }
+
+                    @Override
+                    public void afterStop(AfterStopEvent event) {
+                        checker.append("PASS");
+                    }
                 })
                 .enableFileAddedEventsForInitialContent()
                 .setPollingInterval(10, TimeUnit.MILLISECONDS)
@@ -68,26 +156,42 @@ public class AcceptanceTest extends EventVerifier {
         // then
         latch.await();
         dp.stopNow();
+
+        assertThat(checker.toString()).isEqualTo("PASS");
     }
 
     @Test(timeout = 1000)
-    public void canInterruptWhenProcessingBeforePollingCycleEvent() throws Exception {
+    public void canInterruptWhenProcessingMultipleListeners() throws Exception {
+
         // given 
         final CountDownLatch latch = new CountDownLatch(1);
+        Mockito.when(directoryMock.listFiles())
+                .thenReturn(list("file1.txt/1"));
 
         // when
-        dp = builder.addPolledDirectory(directoryMock)
-                //                .enableParallelPollingOfDirectories()
+        dp = builder
+                .addPolledDirectory(directoryMock)
                 .addListener(new AbstractRdp4jListener() {
 
                     @Override
                     public void beforePollingCycle(BeforePollingCycleEvent event) throws InterruptedException {
                         latch.countDown();
-                        TimeUnit.SECONDS.sleep(100);
+                        SECONDS.sleep(10);
                     }
                 })
+                .addListener(new AbstractRdp4jListener() {
+
+                    @Override
+                    public void beforePollingCycle(BeforePollingCycleEvent event) throws InterruptedException {
+                        latch.countDown();
+                        SECONDS.sleep(10);
+                    }
+                })
+                .enableFileAddedEventsForInitialContent()
+                .setPollingInterval(10, TimeUnit.MILLISECONDS)
                 .start();
 
+        // then
         latch.await();
         dp.stopNow();
     }

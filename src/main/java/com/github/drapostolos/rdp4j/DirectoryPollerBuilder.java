@@ -199,7 +199,11 @@ public final class DirectoryPollerBuilder {
 
             @Override
             public DirectoryPoller call() {
-                dp.notifier.notifyListeners(new BeforeStartEvent(dp));
+                try {
+                    dp.notifier.notifyListeners(new BeforeStartEvent(dp));
+                } catch (InterruptedException e) {
+                    // ignore for now.
+                }
                 dp.start();
                 return dp;
             }

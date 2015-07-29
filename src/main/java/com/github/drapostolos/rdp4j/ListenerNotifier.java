@@ -1,7 +1,6 @@
 package com.github.drapostolos.rdp4j;
 
-import static java.lang.String.format;
-
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,7 +88,7 @@ class ListenerNotifier {
         listenerToEventsMappings.remove(listener);
     }
 
-    void notifyListeners(Event event) {
+    void notifyListeners(Event event) throws InterruptedException {
         Class<?> eventType = event.getClass();
         for (Rdp4jListener listener : listenerToEventsMappings.keySet()) {
             if (listenerToEventsMappings.get(listener).contains(eventType)) {
@@ -102,21 +101,25 @@ class ListenerNotifier {
     /*
      * Ignore if a listener crashes. Log on ERROR level and continue with next listener.
      * Don't let one listener ruin for other listeners...
-     * Only log on DEBUG level if interrupted as it is not an exceptional case.
-     * Client can request to interrupt all ongoing threads.
+     * if interrupted re-throw InterruptedException
      */
-    private void notifyListener(Rdp4jListener listener, Method method, Event event) {
+    private void notifyListener(Rdp4jListener listener, Method method, Event event) throws InterruptedException {
         try {
             method.invoke(listener, event);
-        } catch (Throwable t) {
-            if (t.getCause() instanceof InterruptedException) {
-                String message = "Listener interrupted. method: '%s'; instance: '%s'";
-                logger.debug(format(message, method.getName(), listener));
+        } catch (InvocationTargetException e) {
+            Throwable t = e.getCause();
+            if (t instanceof InterruptedException) {
+                throw (InterruptedException) t;
             } else {
-                String message = "Exception thrown by listener. method: '%s'; instance: '%s'";
-                logger.error(String.format(message, method.getName(), listener), t);
+                logErrorMessage(e, method, listener);
             }
+        } catch (Throwable t) {
+            logErrorMessage(t, method, listener);
         }
     }
 
+    private void logErrorMessage(Throwable t, Method method, Rdp4jListener listener) {
+        String message = "Exception thrown by listener. method: '%s'; instance: '%s'";
+        logger.error(String.format(message, method.getName(), listener), t);
+    }
 }
