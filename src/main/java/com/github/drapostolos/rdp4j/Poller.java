@@ -17,6 +17,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 class Poller implements Callable<Object> {
 
     private static Logger logger = LoggerFactory.getLogger(ScheduledRunnable.class);
+    final PolledDirectory directory;
     private final List<CachedFileElement> modifiedFiles = new ArrayList<CachedFileElement>();
 	private final FileFilter filter;
 	private final ListenerNotifier notifier;
@@ -25,7 +26,6 @@ class Poller implements Callable<Object> {
     private HashMapComparer<String, CachedFileElement> mapComparer;
     private final Map<String, CachedFileElement> currentListedFiles;
     private final Map<String, CachedFileElement> previousListedFiles;
-    private final PolledDirectory directory;
     private final DirectoryPoller dp;
 
     Poller(DirectoryPoller dp, PolledDirectory directory) {
@@ -34,7 +34,7 @@ class Poller implements Callable<Object> {
 
     /*
      * Use this constructor when letting client provide snapshot of last poll,
-     * from a previous DirectoryPoller.
+     * from a previous DirectoryPoller instance.
      */
     private Poller(DirectoryPoller dp, PolledDirectory directory,
             Map<String, CachedFileElement> currentListedFiles,
@@ -71,8 +71,7 @@ class Poller implements Callable<Object> {
             // make sure this events fires before InitialContentEvent
             notifyListenersWithRemovedAddedModifiedFiles();
         }
-        Event event = new InitialContentEvent(dp, directory, currentListedFiles);
-        dp.notifier.notifyListeners(event);
+        dp.notifier.initialContent(new InitialContentEvent(dp, directory, currentListedFiles));
     }
 
     private void doActionsForRemainingPollCycles() throws InterruptedException {
@@ -127,7 +126,7 @@ class Poller implements Callable<Object> {
 				}
 			}
 			if(isFilesystemUnaccessible()){
-				notifier.notifyListeners(new IoErrorCeasedEvent(dp, directory));
+                notifier.ioErrorCeased(new IoErrorCeasedEvent(dp, directory));
 				isFileSystemUnaccessible = true;
 			}
 			currentListedFiles.clear();
@@ -135,7 +134,7 @@ class Poller implements Callable<Object> {
 		} catch (IOException e) {
 			if(isFilesystemAccessible()){
 				isFileSystemUnaccessible = false;
-				notifier.notifyListeners(new IoErrorRaisedEvent(dp, directory, e));
+                notifier.ioErrorRaised(new IoErrorRaisedEvent(dp, directory, e));
 			}
 		} catch(DirectoryPollerException e){
 			// Silently wait fore next poll.
@@ -161,19 +160,44 @@ class Poller implements Callable<Object> {
 
     private void notifyListenersWithRemovedAddedModifiedFiles() throws InterruptedException {
         for (CachedFileElement file : mapComparer.getRemoved().values()) {
-			notifier.notifyListeners(new FileRemovedEvent(dp, directory, file.fileElement));
+            notifier.fileRemoved(new FileRemovedEvent(dp, directory, file.fileElement));
 		}
         for (CachedFileElement file : mapComparer.getAdded().values()) {
-			notifier.notifyListeners(new FileAddedEvent(dp, directory, file.fileElement));
+            notifier.fileAdded(new FileAddedEvent(dp, directory, file.fileElement));
 		}
         for (CachedFileElement file : modifiedFiles) {
-			notifier.notifyListeners(new FileModifiedEvent(dp, directory, file.fileElement));
+            notifier.fileModified(new FileModifiedEvent(dp, directory, file.fileElement));
 		}
 	}
 
     private void copyCurrentListedFilesToPrevious() {
         previousListedFiles.clear();
         previousListedFiles.putAll(currentListedFiles);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((directory == null) ? 0 : directory.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Poller other = (Poller) obj;
+        if (directory == null) {
+            if (other.directory != null)
+                return false;
+        } else if (!directory.equals(other.directory))
+            return false;
+        return true;
     }
 
 }

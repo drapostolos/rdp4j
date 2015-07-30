@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.fest.assertions.api.Assertions;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -32,6 +33,14 @@ public class ScheduledRunnableTest extends EventVerifier {
 		pollerTask = new ScheduledRunnable(directoryPollerMock);
 	}
 	
+    @After
+    public void cleanup() throws Exception {
+        if (pollerTask != null) {
+            pollerTask.shutdown();
+            pollerTask.awaitTermination();
+        }
+    }
+
 	@Test
 	public void filterOutAFile() throws Exception {
 		// given 

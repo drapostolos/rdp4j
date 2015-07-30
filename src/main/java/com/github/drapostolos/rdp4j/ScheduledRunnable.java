@@ -1,11 +1,8 @@
 package com.github.drapostolos.rdp4j;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Queue;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,19 +21,15 @@ final class ScheduledRunnable implements Runnable {
 
     private static Logger logger = LoggerFactory.getLogger(ScheduledRunnable.class);
     private final DirectoryPoller dp;
-    private final Map<PolledDirectory, Poller> pollers = new LinkedHashMap<PolledDirectory, Poller>();
+    private final CopyOnWriteArraySet<Poller> pollers = new CopyOnWriteArraySet<Poller>();
     private final ListenerNotifier notifier;
-    private Queue<Rdp4jListener> listenersToRemove = new ConcurrentLinkedQueue<Rdp4jListener>();
-    private Queue<Rdp4jListener> listenersToAdd = new ConcurrentLinkedQueue<Rdp4jListener>();
-    private Queue<PolledDirectory> directoriesToAdd = new ConcurrentLinkedQueue<PolledDirectory>();
-    private Queue<PolledDirectory> directoriesToRemove = new ConcurrentLinkedQueue<PolledDirectory>();;
     private final ExecutorService executor;
 
     ScheduledRunnable(DirectoryPoller directoryPoller) {
         dp = directoryPoller;
         this.notifier = dp.notifier;
         for (PolledDirectory directory : dp.directories) {
-            pollers.put(directory, new Poller(dp, directory));
+            pollers.add(new Poller(dp, directory));
         }
         if (dp.parallelDirectoryPollingEnabled) {
             executor = Executors.newCachedThreadPool();
@@ -51,59 +44,32 @@ final class ScheduledRunnable implements Runnable {
     @Override
     public synchronized void run() {
         try {
-            addRemoveListeners();
-            addRemoveDirectories();
-
-            notifier.notifyListeners(new BeforePollingCycleEvent(dp));
+            notifier.beforePollingCycle(new BeforePollingCycleEvent(dp));
             if (!executor.isShutdown()) {
-                executor.invokeAll(pollers.values());
+                executor.invokeAll(pollers);
             }
-            notifier.notifyListeners(new AfterPollingCycleEvent(dp));
-            addRemoveListeners();
-            addRemoveDirectories();
+            notifier.afterPollingCycle(new AfterPollingCycleEvent(dp));
         } catch (InterruptedException e) {
-            // allow thread to exit
+            // allow thread to exit gracefully
         } catch (Throwable t) {
             logger.error("Unexpected error!", t);
         }
     }
 
-    private void addRemoveDirectories() {
-        PolledDirectory directory;
-        while ((directory = directoriesToAdd.poll()) != null) {
-            if (!pollers.containsKey(directory)) {
-                pollers.put(directory, new Poller(dp, directory));
-            }
-        }
-        while ((directory = directoriesToRemove.poll()) != null) {
-            pollers.remove(directory);
-        }
-    }
-
-    private void addRemoveListeners() {
-        Rdp4jListener listener;
-        while ((listener = listenersToAdd.poll()) != null) {
-            notifier.addListener(listener);
-        }
-        while ((listener = listenersToRemove.poll()) != null) {
-            notifier.removeListener(listener);
-        }
-    }
-
     void addListener(Rdp4jListener listener) {
-        listenersToAdd.add(listener);
+        notifier.addListener(listener);
     }
 
     void removeListener(Rdp4jListener listener) {
-        listenersToRemove.add(listener);
+        notifier.removeListener(listener);
     }
 
     void addDirectory(PolledDirectory directory) {
-        directoriesToAdd.add(directory);
+        pollers.add(new Poller(dp, directory));
     }
 
-    void removeDirectory(PolledDirectory listener) {
-        directoriesToRemove.add(listener);
+    void removeDirectory(PolledDirectory directory) {
+        pollers.remove(new Poller(dp, directory));
     }
 
     void shutdown() {
@@ -114,8 +80,12 @@ final class ScheduledRunnable implements Runnable {
         Util.awaitTermination(executor);
     }
 
-    synchronized Set<PolledDirectory> getDirectories() {
-        return new LinkedHashSet<PolledDirectory>(pollers.keySet());
+    Set<PolledDirectory> getDirectories() {
+        Set<PolledDirectory> result = new HashSet<PolledDirectory>();
+        for (Poller poller : pollers) {
+            result.add(poller.directory);
+        }
+        return result;
     }
 
 }

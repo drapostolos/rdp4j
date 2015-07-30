@@ -4,6 +4,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.never;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -375,22 +376,18 @@ public class AcceptanceTest extends EventVerifier {
         // given 
         Mockito.when(directoryMock.listFiles())
                 .thenReturn(list())
+                .thenReturn(list())
                 .thenReturn(list("file.txt/12"));
 
         // when
         PollCycleCounter latch = new PollCycleCounter();
         dp = DirectoryPoller.newBuilder()
-                .addListener(latch.onBeforePollingCycleDo(0, new Runnable() {
-
-                    @Override
-                    public void run() {
-                        dp.addListener(listenerMock);
-                    }
-                }))
+                .addListener(latch)
                 .addPolledDirectory(directoryMock)
-                .setPollingInterval(10, TimeUnit.MILLISECONDS)
+                .setPollingInterval(10, MILLISECONDS)
                 .start();
-        latch.awaitAtLeastNumPollCycles(1);
+        dp.addListener(listenerMock);
+        latch.awaitAtLeastNumPollCycles(5);
         dp.stop();
 
         // then
@@ -422,7 +419,7 @@ public class AcceptanceTest extends EventVerifier {
         verifyEventsInOrder(
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class);
-        Mockito.verify(listenerMock, Mockito.never()).afterStop(Mockito.any(AfterStopEvent.class));
+        Mockito.verify(listenerMock, never()).afterStop(Mockito.any(AfterStopEvent.class));
     }
 
     @Test

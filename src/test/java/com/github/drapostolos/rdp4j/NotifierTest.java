@@ -9,6 +9,28 @@ import org.mockito.Mockito;
 
 
 public class NotifierTest {
+
+    @Test
+    public void canCheckIfListenerIsInstanceOfSpecificListenerInterface() throws Exception {
+        Set<Rdp4jListener> listeners = new HashSet<Rdp4jListener>();
+        DirectoryPollerListener listener = new DirectoryPollerListener() {
+
+            @Override
+            public void beforeStart(BeforeStartEvent event) {}
+
+            @Override
+            public void afterStop(AfterStopEvent event) {}
+        };
+        listeners.add(listener);
+
+        // when
+        ListenerNotifier notifier = new ListenerNotifier(listeners);
+
+        // then
+        Assertions.assertThat(notifier.isInstanceOf(listener, DirectoryPollerListener.class)).isTrue();
+        Assertions.assertThat(notifier.isInstanceOf(listener, DirectoryListener.class)).isFalse();
+
+    }
 	
 	@Test
 	public void constructNotifierWithNoListener() throws Exception {
@@ -16,7 +38,7 @@ public class NotifierTest {
 		ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
 		
 		// then
-		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(0);
+        Assertions.assertThat(n.listeners.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -29,19 +51,19 @@ public class NotifierTest {
 		ListenerNotifier n = new ListenerNotifier(l);
 		
 		// then
-		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(1);
+        Assertions.assertThat(n.listeners.size()).isEqualTo(1);
 	}
 	
 	@Test
 	public void AddAndRemoveListeners() throws Exception {
 		ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
-		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(0);
+        Assertions.assertThat(n.listeners.size()).isEqualTo(0);
 		
 		Rdp4jListener l = new Rdp4jListener(){};
 		n.addListener(l);
-		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(1);
+        Assertions.assertThat(n.listeners.size()).isEqualTo(1);
 		n.removeListener(l);
-		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(0);
+        Assertions.assertThat(n.listeners.size()).isEqualTo(0);
 	}
 	
 	@Test
@@ -55,7 +77,7 @@ public class NotifierTest {
 		n.addListener(l);
 		
 		// then 
-		Assertions.assertThat(n.listenerToEventsMappings.size()).isEqualTo(1);
+        Assertions.assertThat(n.listeners.size()).isEqualTo(1);
 	}
 	
 	@Test
@@ -74,7 +96,7 @@ public class NotifierTest {
 		
 		// when
 		FileAddedEvent e = new FileAddedEvent(null, null, null);
-		n.notifyListeners(e);
+        n.fileAdded(e);
 //		n.notifyListeners(e);
 		
 		// then

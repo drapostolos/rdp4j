@@ -1,14 +1,7 @@
 package com.github.drapostolos.rdp4j;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,110 +9,180 @@ import org.slf4j.LoggerFactory;
 class ListenerNotifier {
 
     private static Logger logger = LoggerFactory.getLogger(ListenerNotifier.class);
-    final Map<Rdp4jListener, Set<Class<? extends Event>>> listenerToEventsMappings;
-    final Map<Class<? extends Event>, Method> eventToMethodMappings;
+    final CopyOnWriteArraySet<Rdp4jListener> listeners = new CopyOnWriteArraySet<Rdp4jListener>();
 
     ListenerNotifier(Set<Rdp4jListener> listeners) {
-        listenerToEventsMappings = new HashMap<Rdp4jListener, Set<Class<? extends Event>>>();
-        eventToMethodMappings = new HashMap<Class<? extends Event>, Method>();
-        for (Rdp4jListener listener : listeners) {
-            addListener(listener);
-        }
+        this.listeners.addAll(listeners);
     }
 
     void addListener(Rdp4jListener listener) {
-        if (notAdded(listener)) {
-            listenerToEventsMappings.put(listener, new HashSet<Class<? extends Event>>());
-            extractEventsSupportedByListener(listener);
-        }
-    }
-
-    private boolean notAdded(Rdp4jListener listener) {
-        return !listenerToEventsMappings.containsKey(listener);
-    }
-
-    private void extractEventsSupportedByListener(Rdp4jListener listener) {
-        for (Class<?> interfaceType : getAllInterfaceTypesRepresentedBy(listener)) {
-            if (isListenerType(interfaceType)) {
-                extractEventsFromInterfaceAndAddToMappings(interfaceType, listener);
-            }
-        }
-    }
-
-    private boolean isListenerType(Class<?> cls) {
-        return Rdp4jListener.class.isAssignableFrom(cls);
-    }
-
-    private List<Class<?>> getAllInterfaceTypesRepresentedBy(Object o) {
-        List<Class<?>> allInterfaces = new ArrayList<Class<?>>();
-        getAllInterfaces(o.getClass(), allInterfaces);
-        return allInterfaces;
-    }
-
-    private void getAllInterfaces(Class<?> cls, List<Class<?>> interfaces) {
-        if (cls == null) {
-            return;
-        }
-        interfaces.addAll(Arrays.asList(cls.getInterfaces()));
-        getAllInterfaces(cls.getSuperclass(), interfaces);
-    }
-
-    private void extractEventsFromInterfaceAndAddToMappings(Class<?> interfaceType, Rdp4jListener listener) {
-        for (Method method : interfaceType.getMethods()) {
-            Class<?>[] paramTypes = method.getParameterTypes();
-            if (isEventMethod(paramTypes)) {
-                /*
-                 * This cast is correct since it is assured paramTypes[0]
-                 * is assignable to Event.
-                 */
-                @SuppressWarnings("unchecked")
-                Class<? extends Event> eventType = (Class<? extends Event>) paramTypes[0];
-                eventToMethodMappings.put(eventType, method);
-                listenerToEventsMappings.get(listener).add(eventType);
-            }
-        }
-    }
-
-    private boolean isEventMethod(Class<?>[] paramTypes) {
-        return paramTypes.length == 1 && Event.class.isAssignableFrom(paramTypes[0]);
+        listeners.add(listener);
     }
 
     void removeListener(Rdp4jListener listener) {
-        listenerToEventsMappings.remove(listener);
+        listeners.remove(listener);
     }
 
-    void notifyListeners(Event event) throws InterruptedException {
-        Class<?> eventType = event.getClass();
-        for (Rdp4jListener listener : listenerToEventsMappings.keySet()) {
-            if (listenerToEventsMappings.get(listener).contains(eventType)) {
-                Method method = eventToMethodMappings.get(eventType);
-                notifyListener(listener, method, event);
+    /*
+     * Would be nice to change below anonymous Notifier implementations with Java8
+     * lambdas, in the future.
+     */
+
+    void beforePollingCycle(final BeforePollingCycleEvent event) throws InterruptedException {
+        
+        notifyListeners(PollCycleListener.class, new Notifier<PollCycleListener>() {
+
+            @Override
+            public void notify(PollCycleListener listener) throws InterruptedException {
+                listener.beforePollingCycle(event);
             }
+        });
+    }
+
+    void afterPollingCycle(final AfterPollingCycleEvent event) throws InterruptedException {
+
+        notifyListeners(PollCycleListener.class, new Notifier<PollCycleListener>() {
+
+            @Override
+            public void notify(PollCycleListener listener) throws InterruptedException {
+                listener.afterPollingCycle(event);
+            }
+        });
+    }
+
+    void fileAdded(final FileAddedEvent event) throws InterruptedException {
+
+        notifyListeners(DirectoryListener.class, new Notifier<DirectoryListener>() {
+
+            @Override
+            public void notify(DirectoryListener listener) throws InterruptedException {
+                listener.fileAdded(event);
+            }
+        });
+    }
+
+    void fileRemoved(final FileRemovedEvent event) throws InterruptedException {
+
+        notifyListeners(DirectoryListener.class, new Notifier<DirectoryListener>() {
+
+            @Override
+            public void notify(DirectoryListener listener) throws InterruptedException {
+                listener.fileRemoved(event);
+            }
+        });
+    }
+
+    void fileModified(final FileModifiedEvent event) throws InterruptedException {
+
+        notifyListeners(DirectoryListener.class, new Notifier<DirectoryListener>() {
+
+            @Override
+            public void notify(DirectoryListener listener) throws InterruptedException {
+                listener.fileModified(event);
+            }
+        });
+    }
+
+    void ioErrorRaised(final IoErrorRaisedEvent event) throws InterruptedException {
+
+        notifyListeners(IoErrorListener.class, new Notifier<IoErrorListener>() {
+
+            @Override
+            public void notify(IoErrorListener listener) throws InterruptedException {
+                listener.ioErrorRaised(event);
+            }
+        });
+    }
+
+    void ioErrorCeased(final IoErrorCeasedEvent event) throws InterruptedException {
+
+        notifyListeners(IoErrorListener.class, new Notifier<IoErrorListener>() {
+
+            @Override
+            public void notify(IoErrorListener listener) throws InterruptedException {
+                listener.ioErrorCeased(event);
+            }
+        });
+    }
+
+    void afterStop(final AfterStopEvent event) {
+
+        try {
+            notifyListeners(DirectoryPollerListener.class, new Notifier<DirectoryPollerListener>() {
+
+                @Override
+                public void notify(DirectoryPollerListener listener) throws InterruptedException {
+                    listener.afterStop(event);
+                }
+            });
+        } catch (InterruptedException e) {
+            // ignore
         }
+    }
+
+    void beforeStart(final BeforeStartEvent event) {
+
+        try {
+            notifyListeners(DirectoryPollerListener.class, new Notifier<DirectoryPollerListener>() {
+
+                @Override
+                public void notify(DirectoryPollerListener listener) throws InterruptedException {
+                    listener.beforeStart(event);
+                }
+            });
+        } catch (InterruptedException e) {
+            // ignore
+        }
+    }
+
+    void initialContent(final InitialContentEvent event) throws InterruptedException {
+
+        notifyListeners(InitialContentListener.class, new Notifier<InitialContentListener>() {
+
+            @Override
+            public void notify(InitialContentListener listener) throws InterruptedException {
+                listener.initialContent(event);
+            }
+        });
+    }
+
+    private interface Notifier<T> {
+
+        void notify(T listener) throws InterruptedException;
     }
 
     /*
      * Ignore if a listener crashes. Log on ERROR level and continue with next listener.
      * Don't let one listener ruin for other listeners...
-     * if interrupted re-throw InterruptedException
+     * if interrupted re-throw InterruptedException.
      */
-    private void notifyListener(Rdp4jListener listener, Method method, Event event) throws InterruptedException {
-        try {
-            method.invoke(listener, event);
-        } catch (InvocationTargetException e) {
-            Throwable t = e.getCause();
-            if (t instanceof InterruptedException) {
-                throw (InterruptedException) t;
-            } else {
-                logErrorMessage(e, method, listener);
+    private <T extends Rdp4jListener> void notifyListeners(Class<T> listenerType, Notifier<T> notifier)
+            throws InterruptedException {
+        for (Rdp4jListener listener : listeners) {
+            if (isInstanceOf(listener, listenerType)) {
+                /*
+                 * This cast is correct, since we check if listener
+                 * is instance of listenerType.
+                 */
+                @SuppressWarnings("unchecked")
+                T listener2 = (T) listener;
+                try {
+                    notifier.notify(listener2);
+                } catch (InterruptedException e) {
+                    throw e;
+                } catch (Throwable e) {
+                    logErrorMessage(e);
+                }
             }
-        } catch (Throwable t) {
-            logErrorMessage(t, method, listener);
         }
     }
 
-    private void logErrorMessage(Throwable t, Method method, Rdp4jListener listener) {
-        String message = "Exception thrown by listener. method: '%s'; instance: '%s'";
-        logger.error(String.format(message, method.getName(), listener), t);
+    <T extends Rdp4jListener> boolean isInstanceOf(Rdp4jListener listener, Class<T> listenerType) {
+        return listenerType.isInstance(listener);
     }
+
+    private void logErrorMessage(Throwable t) {
+        logger.error("Exception thrown by client implementation (of Rdp4jListener interface).", t);
+    }
+
 }
