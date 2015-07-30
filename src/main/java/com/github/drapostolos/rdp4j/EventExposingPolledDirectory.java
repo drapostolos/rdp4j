@@ -2,10 +2,10 @@ package com.github.drapostolos.rdp4j;
 
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
-abstract class AbstractDirectoryEvent extends Event{
+abstract class EventExposingPolledDirectory extends EventExposingDirectoryPoller {
 	private final PolledDirectory directory;
 
-	AbstractDirectoryEvent(DirectoryPoller directoryPoller, PolledDirectory directory) {
+	EventExposingPolledDirectory(DirectoryPoller directoryPoller, PolledDirectory directory) {
 		super(directoryPoller);
 		this.directory = directory;
 	}

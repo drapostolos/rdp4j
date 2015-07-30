@@ -199,7 +199,7 @@ public final class DirectoryPollerBuilder {
 
             @Override
             public DirectoryPoller call() {
-                dp.notifier.beforeStart(new BeforeStartEvent(dp));
+                dp.notifier.beforeStart(new BeforeStartEvent());
                 dp.start();
                 return dp;
             }

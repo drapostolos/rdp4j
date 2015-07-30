@@ -3,10 +3,10 @@ package com.github.drapostolos.rdp4j;
 import com.github.drapostolos.rdp4j.spi.FileElement;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
-abstract class AbstractFileEvent extends AbstractDirectoryEvent{
+abstract class EventExposingFileElement extends EventExposingPolledDirectory{
 	private final FileElement file;
 
-	AbstractFileEvent(DirectoryPoller directoryPoller, PolledDirectory directory, FileElement file) {
+	EventExposingFileElement(DirectoryPoller directoryPoller, PolledDirectory directory, FileElement file) {
 		super(directoryPoller, directory);
 		this.file = file;
 	}

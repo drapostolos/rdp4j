@@ -5,7 +5,7 @@ package com.github.drapostolos.rdp4j;
  * 
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
-public final class AfterPollingCycleEvent extends Event{
+public final class AfterPollingCycleEvent extends EventExposingDirectoryPoller {
 
 	AfterPollingCycleEvent(DirectoryPoller dp) {
 		super(dp);

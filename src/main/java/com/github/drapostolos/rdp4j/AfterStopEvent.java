@@ -6,7 +6,7 @@ package com.github.drapostolos.rdp4j;
  * 
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
-public final class AfterStopEvent extends Event {
+public final class AfterStopEvent extends EventExposingDirectoryPoller {
 
 	AfterStopEvent(DirectoryPoller directoryPoller) {
 		super(directoryPoller);

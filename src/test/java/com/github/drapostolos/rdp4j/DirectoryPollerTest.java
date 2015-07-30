@@ -2,6 +2,8 @@ package com.github.drapostolos.rdp4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -36,7 +38,8 @@ public class DirectoryPollerTest {
     public void shouldThrowExceptionWhenNoPolledDirectorySetAtStart() {
 		expectedEx.expect(IllegalStateException.class);
         expectedEx.expectMessage(String.format("Unable to start the '%s'", DirectoryPoller.class.getSimpleName()));
-		expectedEx.expectMessage(String.format("%s.addDirectory(PolledDirectory)", DirectoryPollerBuilder.class.getSimpleName()));
+        expectedEx.expectMessage(
+                String.format("%s.addPolledDirectory(PolledDirectory)", DirectoryPollerBuilder.class.getSimpleName()));
 		DirectoryPoller.newBuilder().start();
 	}
 
@@ -44,7 +47,7 @@ public class DirectoryPollerTest {
     public void shouldHaveSameNumberOfActiveThreadsBeforeStartAndAfterStop() throws Exception {
         // given
         PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
-        int numThreadsBefore = Thread.getAllStackTraces().size();
+        Set<Thread> threadsBefore = new HashSet<Thread>(Thread.getAllStackTraces().keySet());
 
         // when
         dp = builder
@@ -57,7 +60,7 @@ public class DirectoryPollerTest {
 
         //        TimeUnit.MILLISECONDS.sleep(50);
         // then
-        assertThat(Thread.getAllStackTraces()).hasSize(numThreadsBefore);
+        assertThat(Thread.getAllStackTraces().keySet()).containsAll(threadsBefore);
     }
 
 	@Test(expected = NullPointerException.class)

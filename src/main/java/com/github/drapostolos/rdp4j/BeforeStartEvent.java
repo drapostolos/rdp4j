@@ -9,8 +9,4 @@ package com.github.drapostolos.rdp4j;
  */
 public final class BeforeStartEvent extends Event {
 
-	BeforeStartEvent(DirectoryPoller dp) {
-		super(dp);
-	}
-
 }

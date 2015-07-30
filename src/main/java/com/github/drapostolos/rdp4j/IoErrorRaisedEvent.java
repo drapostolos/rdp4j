@@ -9,7 +9,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  *
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
-public final class IoErrorRaisedEvent extends AbstractDirectoryEvent {
+public final class IoErrorRaisedEvent extends EventExposingPolledDirectory {
 	private final IOException ioException;
 
 	IoErrorRaisedEvent(DirectoryPoller dp, PolledDirectory directory, IOException e) {

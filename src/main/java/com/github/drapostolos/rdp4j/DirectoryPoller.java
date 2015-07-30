@@ -77,7 +77,7 @@ public class DirectoryPoller {
             String builderName = DirectoryPollerBuilder.class.getSimpleName();
             String message = "Unable to start the '%s' when No directories has been added! "
                     + "You must add at least one directory before starting the '%s'.\n"
-                    + "Call this method to add a directory: %s.addDirectory(PolledDirectory), "
+                    + "Call this method to add a directory: %s.addPolledDirectory(PolledDirectory), "
                     + "before you can start the %s.";
             throw new IllegalStateException(String.format(message, pollerName, pollerName, builderName, pollerName));
         }
