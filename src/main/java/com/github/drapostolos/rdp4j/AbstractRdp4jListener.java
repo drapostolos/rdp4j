@@ -23,7 +23,6 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
 	/**
      * Dummy implementation doing nothing.
      * 
-     * @throws InterruptedException when interrupted.
      */
 	@Override
     public void beforeStart(BeforeStartEvent event) {
