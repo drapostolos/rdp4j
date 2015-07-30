@@ -1,7 +1,5 @@
 package com.github.drapostolos.rdp4j;
 
-
-
 public class ListenerImpl extends AbstractRdp4jListener {
 
     @Override

@@ -9,14 +9,14 @@ import com.github.drapostolos.rdp4j.IoErrorListener;
 import com.github.drapostolos.rdp4j.IoErrorRaisedEvent;
 
 /**
- * Implementations of this interface represents the directory to poll for 
+ * Implementations of this interface represents the directory to poll for
  * file elements.
  * 
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public interface PolledDirectory {
-	
-	    /**
+
+    /**
      * Returns a snapshot of the current content in this directory, i.e.
      * listing all {@link FileElement}s in this directory.
      * <p>
@@ -41,22 +41,23 @@ public interface PolledDirectory {
      * @throws RuntimeException if any unexpected crashes occurs. This will
      *         cause the Directory-Poller to log an error message (along with the causing
      *         {@link RuntimeException}) and stop the {@link DirectoryPoller}.
-     */ 
-	Set<FileElement> listFiles() throws IOException;
-	
-	/**
+     */
+    Set<FileElement> listFiles() throws IOException;
+
+    /**
      * It is recommended to implement this method if clients wants to remove this
      * {@link PolledDirectory} from the {@link DirectoryPoller}.
      * 
      * @param obj Object to compare.
      */
-	@Override
-	public boolean equals(Object obj);
-	
-	/**
-	 * It is recommended to implement this method if clients wants to remove this
-	 * {@link PolledDirectory} using {@link DirectoryPoller#removePolledDirectory(PolledDirectory)} .
-	 */
-	@Override
-	public int hashCode();
+    @Override
+    public boolean equals(Object obj);
+
+    /**
+     * It is recommended to implement this method if clients wants to remove this
+     * {@link PolledDirectory} using {@link DirectoryPoller#removePolledDirectory(PolledDirectory)}
+     * .
+     */
+    @Override
+    public int hashCode();
 }

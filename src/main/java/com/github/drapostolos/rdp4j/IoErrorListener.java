@@ -6,9 +6,9 @@ package com.github.drapostolos.rdp4j;
  * 
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
-public interface IoErrorListener extends Rdp4jListener{
-	
-	/**
+public interface IoErrorListener extends Rdp4jListener {
+
+    /**
      * Invoked when an I/O error occurs in the {@link DirectoryPoller}.
      * <p>
      * NOTE! Any consecutive poll-cycles with I/O errors will not fire
@@ -19,8 +19,8 @@ public interface IoErrorListener extends Rdp4jListener{
      * @throws InterruptedException when interrupted.
      */
     void ioErrorRaised(IoErrorRaisedEvent event) throws InterruptedException;
-	
-	/**
+
+    /**
      * Invoked when the {@link DirectoryPoller} has recovered from an
      * I/O error.
      * 

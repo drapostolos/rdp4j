@@ -7,8 +7,8 @@ package com.github.drapostolos.rdp4j;
  */
 public final class BeforePollingCycleEvent extends EventExposingDirectoryPoller {
 
-	BeforePollingCycleEvent(DirectoryPoller dp) {
-		super(dp);
-	}
+    BeforePollingCycleEvent(DirectoryPoller dp) {
+        super(dp);
+    }
 
 }

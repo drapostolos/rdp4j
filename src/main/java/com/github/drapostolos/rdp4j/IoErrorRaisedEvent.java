@@ -10,18 +10,19 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class IoErrorRaisedEvent extends EventExposingPolledDirectory {
-	private final IOException ioException;
 
-	IoErrorRaisedEvent(DirectoryPoller dp, PolledDirectory directory, IOException e) {
-		super(dp, directory);
-		ioException = e;
-	}
-	
-	/**
+    private final IOException ioException;
+
+    IoErrorRaisedEvent(DirectoryPoller dp, PolledDirectory directory, IOException e) {
+        super(dp, directory);
+        ioException = e;
+    }
+
+    /**
      * @return the {@link IOException} that caused this event.
      */
-	public IOException getIoException() {
-		return ioException;
-	}
+    public IOException getIoException() {
+        return ioException;
+    }
 
 }

@@ -10,8 +10,8 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 public final class FileModifiedEvent extends EventExposingFileElement {
 
-	FileModifiedEvent(DirectoryPoller directoryPoller, PolledDirectory directory, FileElement file) {
-		super(directoryPoller, directory, file);
-	}
+    FileModifiedEvent(DirectoryPoller directoryPoller, PolledDirectory directory, FileElement file) {
+        super(directoryPoller, directory, file);
+    }
 
 }

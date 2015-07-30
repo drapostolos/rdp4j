@@ -22,21 +22,21 @@ import com.github.drapostolos.rdp4j.spi.FileElement;
  */
 final class Util {
 
-    private static Logger logger = LoggerFactory.getLogger(Util.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Util.class);
 
     Util() {
         throw new AssertionError("Not meant for instantiation");
     }
 
     static Set<FileElement> copyValuesToFileElementSet(Map<String, CachedFileElement> files) {
-        HashSet<FileElement> result = new HashSet<FileElement>();
+        Set<FileElement> result = new HashSet<FileElement>();
         for (CachedFileElement file : files.values()) {
             result.add(file.fileElement);
         }
         return result;
     }
 
-    static LinkedHashMap<String, CachedFileElement> newLinkedHashMap() {
+    static Map<String, CachedFileElement> newLinkedHashMap() {
         return new LinkedHashMap<String, CachedFileElement>();
     }
 
@@ -46,7 +46,7 @@ final class Util {
                 executor.awaitTermination(MAX_VALUE, DAYS);
                 return;
             } catch (InterruptedException e) {
-                logger.warn("Thread interrupted, but ignored.");
+                LOG.warn("Thread interrupted, but ignored.");
             }
         }
     }

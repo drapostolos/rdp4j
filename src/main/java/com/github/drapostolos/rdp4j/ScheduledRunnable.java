@@ -19,9 +19,9 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 final class ScheduledRunnable implements Runnable {
 
-    private static Logger logger = LoggerFactory.getLogger(ScheduledRunnable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduledRunnable.class);
     private final DirectoryPoller dp;
-    private final CopyOnWriteArraySet<Poller> pollers = new CopyOnWriteArraySet<Poller>();
+    private final Set<Poller> pollers = new CopyOnWriteArraySet<Poller>();
     private final ListenerNotifier notifier;
     private final ExecutorService executor;
 
@@ -52,7 +52,7 @@ final class ScheduledRunnable implements Runnable {
         } catch (InterruptedException e) {
             // allow thread to exit gracefully
         } catch (Throwable t) {
-            logger.error("Unexpected error!", t);
+            LOG.error("Unexpected error!", t);
         }
     }
 

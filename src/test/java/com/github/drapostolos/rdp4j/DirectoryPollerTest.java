@@ -20,8 +20,9 @@ public class DirectoryPollerTest {
     private DirectoryPoller dp;
     private DirectoryPollerBuilder builder;
 
-	@Rule public ExpectedException expectedEx = ExpectedException.none();
-	
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
+
     @Before
     public void testFixture() throws Exception {
         builder = DirectoryPoller.newBuilder();
@@ -34,14 +35,14 @@ public class DirectoryPollerTest {
         }
     }
 
-	@Test
+    @Test
     public void shouldThrowExceptionWhenNoPolledDirectorySetAtStart() {
-		expectedEx.expect(IllegalStateException.class);
+        expectedEx.expect(IllegalStateException.class);
         expectedEx.expectMessage(String.format("Unable to start the '%s'", DirectoryPoller.class.getSimpleName()));
         expectedEx.expectMessage(
                 String.format("%s.addPolledDirectory(PolledDirectory)", DirectoryPollerBuilder.class.getSimpleName()));
-		DirectoryPoller.newBuilder().start();
-	}
+        DirectoryPoller.newBuilder().start();
+    }
 
     @Test
     public void shouldHaveSameNumberOfActiveThreadsBeforeStartAndAfterStop() throws Exception {
@@ -63,52 +64,52 @@ public class DirectoryPollerTest {
         assertThat(Thread.getAllStackTraces().keySet()).containsAll(threadsBefore);
     }
 
-	@Test(expected = NullPointerException.class)
-	public void shouldThrowExceptionWhenAddingDirectoryThatIsNull() {
-		// given
-		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
+    @Test(expected = NullPointerException.class)
+    public void shouldThrowExceptionWhenAddingDirectoryThatIsNull() {
+        // given
+        PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
         dp = builder
-				.addPolledDirectory(directoryMock)
-				.start();
-		
-		// when
-		dp.addPolledDirectory(null);
-	}
+                .addPolledDirectory(directoryMock)
+                .start();
 
-	@Test(expected = NullPointerException.class)
-	public void removeNullDirectory() {
-		// given
-		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
-        dp = builder
-				.addPolledDirectory(directoryMock)
-				.start();
-		
-		// when
-		dp.removePolledDirectory(null);
-	}
+        // when
+        dp.addPolledDirectory(null);
+    }
 
-	@Test(expected = NullPointerException.class)
-	public void addNullListener() {
-		// given
-		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
+    @Test(expected = NullPointerException.class)
+    public void removeNullDirectory() {
+        // given
+        PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
         dp = builder
-				.addPolledDirectory(directoryMock)
-				.start();
-		
-		// when
-		dp.addListener(null);
-	}
+                .addPolledDirectory(directoryMock)
+                .start();
 
-	@Test(expected = NullPointerException.class)
-	public void removeNullListener() {
-		// given
-		PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
+        // when
+        dp.removePolledDirectory(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void addNullListener() {
+        // given
+        PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
         dp = builder
-				.addPolledDirectory(directoryMock)
-				.start();
-		
-		// when
-		dp.removeListener(null);
-	}
+                .addPolledDirectory(directoryMock)
+                .start();
+
+        // when
+        dp.addListener(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void removeNullListener() {
+        // given
+        PolledDirectory directoryMock = Mockito.mock(PolledDirectory.class);
+        dp = builder
+                .addPolledDirectory(directoryMock)
+                .start();
+
+        // when
+        dp.removeListener(null);
+    }
 
 }

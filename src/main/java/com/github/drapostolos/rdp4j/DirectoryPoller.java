@@ -20,16 +20,16 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * <p>
  * Simple usage example:
  * <pre>
- * 		DirectoryPoller dp = DirectoryPoller.newBuilder()
- * 		.addDirectory(new MyPolledDirectoryImp(...))
- * 		.addListener(new MyListenerImp())
- * 		.setPollingInterval(2, TimeUnit.SECONDS) // optional, 1 second default.
- * 		.setFileFilter(new MyFileFilterImp()) // optional, default matches all files.
- * 		.start();
- * 		
- * 		// do something
- * 
- * 		dp.stop();
+ *  DirectoryPoller dp = DirectoryPoller.newBuilder()
+ *  .addDirectory(new MyPolledDirectoryImp(...))
+ *  .addListener(new MyListenerImp())
+ *  .setPollingInterval(2, TimeUnit.SECONDS) // optional, 1 second default.
+ *  .setFileFilter(new MyFileFilterImp()) // optional, default matches all files.
+ *  .start();
+ *  
+ *  // do something
+ *  
+ *  dp.stop();
  * 
  * </pre>
  * 
@@ -37,6 +37,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 public class DirectoryPoller {
 
+    private static final String NULL_ARGUMENT_ERROR = "Argument is null.";
     private static final long WITH_NO_DELAY = 0;
     private static AtomicInteger threadCount = new AtomicInteger();
     private volatile boolean shouldInvokeShutdownTask = true;
@@ -52,13 +53,6 @@ public class DirectoryPoller {
     boolean fileAddedEventEnabledForInitialContent;
     boolean parallelDirectoryPollingEnabled;
     Set<PolledDirectory> directories;
-
-    /**
-     * @return a new {@link DirectoryPollerBuilder}.
-     */
-    public static DirectoryPollerBuilder newBuilder() {
-        return new DirectoryPollerBuilder();
-    }
 
     /* package-private access only */
     DirectoryPoller(DirectoryPollerBuilder builder) {
@@ -82,14 +76,17 @@ public class DirectoryPoller {
             throw new IllegalStateException(String.format(message, pollerName, pollerName, builderName, pollerName));
         }
 
-        setThreadName();
-        scheduledRunnable = new ScheduledRunnable(this);
-    }
-
-    private void setThreadName() {
         if (threadName.equals(DEFAULT_THREAD_NAME)) {
             threadName = threadName + threadCount.incrementAndGet();
         }
+        scheduledRunnable = new ScheduledRunnable(this);
+    }
+
+    /**
+     * @return a new {@link DirectoryPollerBuilder}.
+     */
+    public static DirectoryPollerBuilder newBuilder() {
+        return new DirectoryPollerBuilder();
     }
 
     void start() {
@@ -193,7 +190,6 @@ public class DirectoryPoller {
     /**
      * Blocks until the last poll-cycle has finished and all {@link AfterStopEvent} has been
      * processed.
-     * 
      */
     public void awaitTermination() {
         try {
@@ -252,7 +248,7 @@ public class DirectoryPoller {
      */
     public void addListener(Rdp4jListener listener) {
         if (listener == null) {
-            throw new NullPointerException("Argument is null.");
+            throw new NullPointerException(NULL_ARGUMENT_ERROR);
         }
         scheduledRunnable.addListener(listener);
     }
@@ -270,7 +266,7 @@ public class DirectoryPoller {
      */
     public void removeListener(Rdp4jListener listener) {
         if (listener == null) {
-            throw new NullPointerException("Argument is null.");
+            throw new NullPointerException(NULL_ARGUMENT_ERROR);
         }
         scheduledRunnable.removeListener(listener);
     }
@@ -286,7 +282,7 @@ public class DirectoryPoller {
      */
     public void addPolledDirectory(PolledDirectory directory) {
         if (directory == null) {
-            throw new NullPointerException("Argument is null.");
+            throw new NullPointerException(NULL_ARGUMENT_ERROR);
         }
         scheduledRunnable.addDirectory(directory);
     }
@@ -303,7 +299,7 @@ public class DirectoryPoller {
      */
     public void removePolledDirectory(PolledDirectory directory) {
         if (directory == null) {
-            throw new NullPointerException("Argument is null.");
+            throw new NullPointerException(NULL_ARGUMENT_ERROR);
         }
         scheduledRunnable.removeDirectory(directory);
     }

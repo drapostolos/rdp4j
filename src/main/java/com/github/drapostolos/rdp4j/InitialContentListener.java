@@ -5,8 +5,8 @@ package com.github.drapostolos.rdp4j;
  *
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
-public interface InitialContentListener extends Rdp4jListener{
-	
+public interface InitialContentListener extends Rdp4jListener {
+
     /**
      * Invoked once during the first poll-cycle of the {@link DirectoryPoller}.
      * 

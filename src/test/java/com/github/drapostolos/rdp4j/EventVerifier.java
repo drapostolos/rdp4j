@@ -11,23 +11,23 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 class EventVerifier {
 
-	protected ScheduledRunnable pollerTask;
-	protected AbstractRdp4jListener listenerMock;
-	protected InOrder inOrder;
-	protected Set<PolledDirectory> directories = new LinkedHashSet<PolledDirectory>();
-	protected PolledDirectory directoryMock;
-	protected DirectoryPoller directoryPollerMock;
+    protected ScheduledRunnable pollerTask;
+    protected AbstractRdp4jListener listenerMock;
+    protected InOrder inOrder;
+    protected Set<PolledDirectory> directories = new LinkedHashSet<PolledDirectory>();
+    protected PolledDirectory directoryMock;
+    protected DirectoryPoller directoryPollerMock;
 
-	protected void executeNumberOfPollCycles(int numOfPollCycles) {
-		for(int i = 0; i < numOfPollCycles; i++){
-			pollerTask.run();
-		}
-	}
+    protected void executeNumberOfPollCycles(int numOfPollCycles) {
+        for (int i = 0; i < numOfPollCycles; i++) {
+            pollerTask.run();
+        }
+    }
 
-	/*
-	 * Dispatch event to the "verifyInOrder_" methods below.
-	 */
-	protected void verifyEventsInOrder(Class<?>... events) throws Exception {
+    /*
+     * Dispatch event to the "verifyInOrder_" methods below.
+     */
+    protected void verifyEventsInOrder(Class<?>... events) throws Exception {
         for (Class<?> event : events) {
             if (event.equals(InitialContentEvent.class)) {
                 inOrder.verify(listenerMock).initialContent(Mockito.any(InitialContentEvent.class));
@@ -53,24 +53,23 @@ class EventVerifier {
                 throw new RuntimeException("Missing event in When verifying order: " + event);
             }
         }
-	}
+    }
 
-
-	/*
-	 * input argument is in the form: "file-name/lastModified"
-	 * Example "my.txt/1233"
-	 */
-	public Set<FileElement> list(String... files) throws Exception {
-		Set<FileElement> result = new LinkedHashSet<FileElement>();
-		for(String nameAndTime : files){
-			String[] t = nameAndTime.split("/");
-			String fileName = t[0];
-			long lastModified = Long.parseLong(t[1]);
-			FileElement file = new StubbedFileElement(fileName, lastModified);
-			result.add(file);
-		}
-		return result;
-	}
+    /*
+     * input argument is in the form: "file-name/lastModified"
+     * Example "my.txt/1233"
+     */
+    public Set<FileElement> list(String... files) throws Exception {
+        Set<FileElement> result = new LinkedHashSet<FileElement>();
+        for (String nameAndTime : files) {
+            String[] t = nameAndTime.split("/");
+            String fileName = t[0];
+            long lastModified = Long.parseLong(t[1]);
+            FileElement file = new StubbedFileElement(fileName, lastModified);
+            result.add(file);
+        }
+        return result;
+    }
 
     public FileElement[] array(String... files) throws Exception {
         return list(files).toArray(new StubbedFileElement[0]);

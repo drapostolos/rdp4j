@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 class ListenerNotifier {
 
-    private static Logger logger = LoggerFactory.getLogger(ListenerNotifier.class);
-    final CopyOnWriteArraySet<Rdp4jListener> listeners = new CopyOnWriteArraySet<Rdp4jListener>();
+    private static final Logger LOG = LoggerFactory.getLogger(ListenerNotifier.class);
+    final Set<Rdp4jListener> listeners = new CopyOnWriteArraySet<Rdp4jListener>();
 
     ListenerNotifier(Set<Rdp4jListener> listeners) {
         this.listeners.addAll(listeners);
@@ -29,7 +29,7 @@ class ListenerNotifier {
      */
 
     void beforePollingCycle(final BeforePollingCycleEvent event) throws InterruptedException {
-        
+
         notifyListeners(PollCycleListener.class, new Notifier<PollCycleListener>() {
 
             @Override
@@ -182,7 +182,7 @@ class ListenerNotifier {
     }
 
     private void logErrorMessage(Throwable t) {
-        logger.error("Exception thrown by client implementation (of Rdp4jListener interface).", t);
+        LOG.error("Exception thrown by client implementation (of Rdp4jListener interface).", t);
     }
 
 }

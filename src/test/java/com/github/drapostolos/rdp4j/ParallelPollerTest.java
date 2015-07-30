@@ -14,37 +14,37 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ScheduledRunnable.class)
-public class ParallelPollerTest extends EventVerifier{
+public class ParallelPollerTest extends EventVerifier {
 
-	@Test
-	public void singleThreadExecutor() throws Exception {
-		// given
-		PowerMockito.mockStatic(Executors.class);
-		DirectoryPoller dp = Mockito.mock(DirectoryPoller.class);
-		dp.directories = new HashSet<PolledDirectory>();
-		dp.parallelDirectoryPollingEnabled = false;
+    @Test
+    public void singleThreadExecutor() throws Exception {
+        // given
+        PowerMockito.mockStatic(Executors.class);
+        DirectoryPoller dp = Mockito.mock(DirectoryPoller.class);
+        dp.directories = new HashSet<PolledDirectory>();
+        dp.parallelDirectoryPollingEnabled = false;
 
-		// when
-		pollerTask = new ScheduledRunnable(dp);
-		
-		// then
-		PowerMockito.verifyStatic();
-		Executors.newSingleThreadExecutor();
-	}
+        // when
+        pollerTask = new ScheduledRunnable(dp);
 
-	@Test
-	public void cachedThreadPool() throws Exception {
-		// given
-		PowerMockito.mockStatic(Executors.class);
-		DirectoryPoller dp = Mockito.mock(DirectoryPoller.class);
-		dp.directories = new HashSet<PolledDirectory>();
-		dp.parallelDirectoryPollingEnabled = true;
+        // then
+        PowerMockito.verifyStatic();
+        Executors.newSingleThreadExecutor();
+    }
 
-		// when
-		pollerTask = new ScheduledRunnable(dp);
-		
-		// then
-		PowerMockito.verifyStatic();
-		Executors.newCachedThreadPool();
-	}
+    @Test
+    public void cachedThreadPool() throws Exception {
+        // given
+        PowerMockito.mockStatic(Executors.class);
+        DirectoryPoller dp = Mockito.mock(DirectoryPoller.class);
+        dp.directories = new HashSet<PolledDirectory>();
+        dp.parallelDirectoryPollingEnabled = true;
+
+        // when
+        pollerTask = new ScheduledRunnable(dp);
+
+        // then
+        PowerMockito.verifyStatic();
+        Executors.newCachedThreadPool();
+    }
 }

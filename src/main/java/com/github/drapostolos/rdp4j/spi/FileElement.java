@@ -36,19 +36,19 @@ public interface FileElement {
      *         the Directory-Poller to log an error message (along with the causing
      *         {@link RuntimeException}) and stop the {@link DirectoryPoller}.
      */
-	long lastModified() throws IOException;
-	
-	/**
-	 * This method returns true, if this {@link FileElement} represents 
-	 * a directory, otherwise false.
-	 * <p>
-	 * This method is optional to implement.
-	 * 
-	 * @return true if this {@link FileElement} instance represents a 
-	 * directory, otherwise false.
-	 */
-	boolean isDirectory();
-	
+    long lastModified() throws IOException;
+
+    /**
+     * This method returns true, if this {@link FileElement} represents
+     * a directory, otherwise false.
+     * <p>
+     * This method is optional to implement.
+     * 
+     * @return true if this {@link FileElement} instance represents a
+     *         directory, otherwise false.
+     */
+    boolean isDirectory();
+
     /**
      * Returns the name of this {@link FileElement}.
      * <p>
@@ -66,5 +66,5 @@ public interface FileElement {
      *         the Directory-Poller to log an error message (along with the causing
      *         {@link RuntimeException}) and stop the {@link DirectoryPoller}.
      */
-	String getName();
+    String getName();
 }

@@ -1,21 +1,21 @@
 package com.github.drapostolos.rdp4j;
 
+abstract class EventExposingDirectoryPoller implements Event {
 
-abstract class EventExposingDirectoryPoller extends Event {
-	final DirectoryPoller dp;
+    final DirectoryPoller dp;
 
-	EventExposingDirectoryPoller(DirectoryPoller directoryPoller) {
-		dp = directoryPoller;
-	}
-	
-	/**
+    EventExposingDirectoryPoller(DirectoryPoller directoryPoller) {
+        dp = directoryPoller;
+    }
+
+    /**
      * Returns the {@link DirectoryPoller} instance which fired
      * this event.
      * 
      * @return {@link DirectoryPoller}
      */
-    public DirectoryPoller getDirectoryPoller(){
-		return dp;
-	}
-	
+    public DirectoryPoller getDirectoryPoller() {
+        return dp;
+    }
+
 }

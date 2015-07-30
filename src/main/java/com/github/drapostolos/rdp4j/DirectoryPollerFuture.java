@@ -22,6 +22,7 @@ public final class DirectoryPollerFuture {
      * Retrieves the {@link DirectoryPoller} instance.
      * This method will block until all {@link BeforeStartEvent} events has been
      * fired (and processed by all listeners.)
+     * 
      * @return a started {@link DirectoryPoller} instance.
      */
     public DirectoryPoller get() {

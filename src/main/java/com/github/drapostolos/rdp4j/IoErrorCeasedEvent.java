@@ -9,8 +9,8 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 public final class IoErrorCeasedEvent extends EventExposingPolledDirectory {
 
-	IoErrorCeasedEvent(DirectoryPoller dp, PolledDirectory directory) {
-		super(dp, directory);
-	}
+    IoErrorCeasedEvent(DirectoryPoller dp, PolledDirectory directory) {
+        super(dp, directory);
+    }
 
 }

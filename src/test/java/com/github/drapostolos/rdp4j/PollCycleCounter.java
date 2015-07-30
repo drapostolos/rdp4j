@@ -3,7 +3,6 @@ package com.github.drapostolos.rdp4j;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
-
 public class PollCycleCounter extends AbstractRdp4jListener {
 
     private int cycleCounter = 0;
