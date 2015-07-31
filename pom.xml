@@ -201,8 +201,8 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:https://github.com/drapostolos/rdp4j.git</connection>
-		<developerConnection>scm:git:https://github.com/drapostolos/rdp4j.git</developerConnection>
+		<connection>scm:git:git@github.com:drapostolos/rdp4j.git</connection>
+		<developerConnection>scm:git:git@github.com:drapostolos/rdp4j.git</developerConnection>
 		<url>https://github.com/drapostolos/rdp4j.git</url>
 	</scm>
 </project>
