@@ -1,5 +1,7 @@
 package com.github.drapostolos.rdp4j;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fest.assertions.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,12 +63,12 @@ public class ScheduledRunnableTest extends EventVerifier {
                 InitialContentEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 FileAddedEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#3
+                // poll-cycle#3
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class);
         Mockito.verifyNoMoreInteractions(listenerMock);
@@ -95,10 +96,10 @@ public class ScheduledRunnableTest extends EventVerifier {
                 InitialContentEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 // Nothing should happen
 
-        // poll-cycle#3
+                // poll-cycle#3
                 BeforePollingCycleEvent.class,
                 FileAddedEvent.class,
                 AfterPollingCycleEvent.class);
@@ -136,22 +137,22 @@ public class ScheduledRunnableTest extends EventVerifier {
                 InitialContentEvent.class, // fileA/1
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 FileAddedEvent.class, // fileB/1
                 InitialContentEvent.class, // FileA/1
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#3
+                // poll-cycle#3
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#4
+                // poll-cycle#4
                 BeforePollingCycleEvent.class,
                 InitialContentEvent.class, // FileA/1, FileB/1
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#5
+                // poll-cycle#5
                 BeforePollingCycleEvent.class,
                 FileAddedEvent.class, // FileC/1
                 AfterPollingCycleEvent.class);
@@ -193,11 +194,11 @@ public class ScheduledRunnableTest extends EventVerifier {
                 IoErrorRaisedEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#3
+                // poll-cycle#3
                 BeforePollingCycleEvent.class,
                 IoErrorCeasedEvent.class,
                 InitialContentEvent.class,
@@ -223,12 +224,12 @@ public class ScheduledRunnableTest extends EventVerifier {
                 InitialContentEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 IoErrorRaisedEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#3
+                // poll-cycle#3
                 BeforePollingCycleEvent.class,
                 IoErrorCeasedEvent.class,
                 AfterPollingCycleEvent.class);
@@ -252,7 +253,7 @@ public class ScheduledRunnableTest extends EventVerifier {
                 InitialContentEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class);
         Mockito.verifyNoMoreInteractions(listenerMock);
@@ -276,19 +277,19 @@ public class ScheduledRunnableTest extends EventVerifier {
                 InitialContentEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 FileAddedEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#3
+                // poll-cycle#3
                 BeforePollingCycleEvent.class,
                 FileRemovedEvent.class,
                 FileAddedEvent.class,
                 FileModifiedEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#4
+                // poll-cycle#4
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class);
         Mockito.verifyNoMoreInteractions(listenerMock);
@@ -316,14 +317,14 @@ public class ScheduledRunnableTest extends EventVerifier {
         executeNumberOfPollCycles(2);
 
         // then
-        Assertions.assertThat(files).containsAll(list("fileA/1", "fileB/1"));
+        assertThat(files).containsAll(list("fileA/1", "fileB/1"));
         verifyEventsInOrder(
                 // poll-cycle#1
                 BeforePollingCycleEvent.class,
                 InitialContentEvent.class,
                 AfterPollingCycleEvent.class,
 
-        // poll-cycle#2
+                // poll-cycle#2
                 BeforePollingCycleEvent.class,
                 AfterPollingCycleEvent.class);
         Mockito.verifyNoMoreInteractions(listenerMock);

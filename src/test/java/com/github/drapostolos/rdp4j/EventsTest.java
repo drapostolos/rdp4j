@@ -1,8 +1,9 @@
 package com.github.drapostolos.rdp4j;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 
-import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -22,9 +23,9 @@ public class EventsTest {
         IoErrorRaisedEvent event = new IoErrorRaisedEvent(dp, directory, e);
 
         // then
-        Assertions.assertThat(event.getIoException()).isEqualTo(e);
-        Assertions.assertThat(event.getPolledDirectory()).isEqualTo(directory);
-        Assertions.assertThat(event.getDirectoryPoller()).isEqualTo(dp);
+        assertThat(event.getIoException()).isEqualTo(e);
+        assertThat(event.getPolledDirectory()).isEqualTo(directory);
+        assertThat(event.getDirectoryPoller()).isEqualTo(dp);
 
     }
 
@@ -39,9 +40,9 @@ public class EventsTest {
         FileAddedEvent event = new FileAddedEvent(dp, directory, file);
 
         // then
-        Assertions.assertThat(event.getFileElement()).isEqualTo(file);
-        Assertions.assertThat(event.getPolledDirectory()).isEqualTo(directory);
-        Assertions.assertThat(event.getDirectoryPoller()).isEqualTo(dp);
+        assertThat(event.getFileElement()).isEqualTo(file);
+        assertThat(event.getPolledDirectory()).isEqualTo(directory);
+        assertThat(event.getDirectoryPoller()).isEqualTo(dp);
 
     }
 
