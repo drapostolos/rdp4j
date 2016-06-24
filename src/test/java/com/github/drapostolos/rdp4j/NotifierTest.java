@@ -1,9 +1,10 @@
 package com.github.drapostolos.rdp4j;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -26,8 +27,8 @@ public class NotifierTest {
         ListenerNotifier notifier = new ListenerNotifier(listeners);
 
         // then
-        Assertions.assertThat(notifier.isInstanceOf(listener, DirectoryPollerListener.class)).isTrue();
-        Assertions.assertThat(notifier.isInstanceOf(listener, DirectoryListener.class)).isFalse();
+        assertThat(notifier.isInstanceOf(listener, DirectoryPollerListener.class)).isTrue();
+        assertThat(notifier.isInstanceOf(listener, DirectoryListener.class)).isFalse();
 
     }
 
@@ -37,7 +38,7 @@ public class NotifierTest {
         ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
 
         // then
-        Assertions.assertThat(n.listeners.size()).isEqualTo(0);
+        assertThat(n.listeners.size()).isEqualTo(0);
     }
 
     @Test
@@ -50,19 +51,19 @@ public class NotifierTest {
         ListenerNotifier n = new ListenerNotifier(l);
 
         // then
-        Assertions.assertThat(n.listeners.size()).isEqualTo(1);
+        assertThat(n.listeners.size()).isEqualTo(1);
     }
 
     @Test
     public void AddAndRemoveListeners() throws Exception {
         ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
-        Assertions.assertThat(n.listeners.size()).isEqualTo(0);
+        assertThat(n.listeners.size()).isEqualTo(0);
 
         Rdp4jListener l = new Rdp4jListener() {};
         n.addListener(l);
-        Assertions.assertThat(n.listeners.size()).isEqualTo(1);
+        assertThat(n.listeners.size()).isEqualTo(1);
         n.removeListener(l);
-        Assertions.assertThat(n.listeners.size()).isEqualTo(0);
+        assertThat(n.listeners.size()).isEqualTo(0);
     }
 
     @Test
@@ -76,7 +77,7 @@ public class NotifierTest {
         n.addListener(l);
 
         // then 
-        Assertions.assertThat(n.listeners.size()).isEqualTo(1);
+        assertThat(n.listeners.size()).isEqualTo(1);
     }
 
     @Test

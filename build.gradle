@@ -1,0 +1,100 @@
+plugins {
+  id 'net.researchgate.release' version '2.4.0'
+  id 'java'
+  id 'maven'
+  id 'signing'
+}
+
+sourceCompatibility = 1.6
+group = 'com.github.drapostolos'
+archivesBaseName = 'rdp4j'
+afterReleaseBuild.dependsOn uploadArchives
+
+task wrapper(type: Wrapper) {
+   gradleVersion = '2.14' //version required
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    testCompile 'org.slf4j:slf4j-simple:1.7.21'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.powermock:powermock-api-mockito:1.6.5'
+    testCompile 'org.powermock:powermock-module-junit4:1.6.5'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile 'org.assertj:assertj-core:1.7.1'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: hasProperty('ossrhUsername')?ossrhUsername:'', password: hasProperty('ossrhPassword')?ossrhPassword:'')
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: hasProperty('ossrhUsername')?ossrhUsername:'', password: hasProperty('ossrhPassword')?ossrhPassword:'')
+      }
+
+      pom.project {
+        name 'RDP4J'
+        packaging 'jar'
+        description 'This library provides a Java SPI for polling directories on a REMOTE filesystem.'
+        url 'https://github.com/drapostolos/rdp4j'
+
+        scm {
+          connection 'scm:git:https://github.com/drapostolos/rdp4j'
+          developerConnection 'scm:git:https://github.com/drapostolos/rdp4j'
+          url 'https://github.com/drapostolos/rdp4j'
+        }
+
+        licenses {
+          license {
+            name 'The MIT License (MIT)'
+            url 'http://opensource.org/licenses/MIT'
+          }
+        }
+
+        developers {
+          developer {
+            id 'drapostolos'
+            name 'Alexander Poulikakos'
+            email 'github@labelscans.com'
+          }
+        }
+      }
+    }
+  }
+}
+
+release {
+    preTagCommitMessage = '[Gradle Release Plugin] - release '
+    tagCommitMessage = '[Gradle Release Plugin] - creating tag '
+    newVersionCommitMessage = '[Gradle Release Plugin] - prepare for next development iteration '
+    tagTemplate = '$name-$version'
+    buildTasks = ['build']
+}
