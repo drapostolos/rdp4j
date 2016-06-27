@@ -1,9 +1,14 @@
 package com.github.drapostolos.rdp4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class PollCycleCounter extends AbstractRdp4jListener {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PollCycleCounter.class);
 
     private int cycleCounter = 0;
     private int numOfcyclesBeforeStop = Integer.MAX_VALUE;
@@ -96,7 +101,7 @@ public class PollCycleCounter extends AbstractRdp4jListener {
 
     private void logEventIfDebugEnabled(Event event) {
         if (debugEnabled) {
-            System.out.println("# " + event.getClass().getSimpleName() + "; ThreadId: "
+            LOG.debug("# " + event.getClass().getSimpleName() + "; ThreadId: "
                     + Thread.currentThread().getId());
         }
     }
