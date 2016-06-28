@@ -1,45 +1,50 @@
 package com.github.drapostolos.rdp4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ListenerImpl extends AbstractRdp4jListener {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ListenerImpl.class);
 
     @Override
     public void afterPollingCycle(AfterPollingCycleEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void beforePollingCycle(BeforePollingCycleEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void fileAdded(FileAddedEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void fileModified(FileModifiedEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void afterStop(AfterStopEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void beforeStart(BeforeStartEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void fileRemoved(FileRemovedEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
     @Override
     public void initialContent(InitialContentEvent event) {
-        System.out.println(event);
+        LOG.info(event.toString());
     }
 
 }
