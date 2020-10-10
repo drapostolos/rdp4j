@@ -57,7 +57,7 @@ public class DirectoryPoller {
     /* package-private access only */
     DirectoryPoller(DirectoryPollerBuilder builder) {
         // First copy values from builder...
-        directories = new LinkedHashSet<PolledDirectory>(builder.directories);
+        directories = new LinkedHashSet<>(builder.directories);
         filter = builder.filter;
         pollingIntervalInMillis = builder.pollingIntervalInMillis;
         threadName = builder.threadName;
