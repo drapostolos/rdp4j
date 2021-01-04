@@ -23,131 +23,55 @@ class ListenerNotifier {
         listeners.remove(listener);
     }
 
-    /*
-     * Would be nice to change below anonymous Notifier implementations with Java8
-     * lambdas, in the future.
-     */
-
     void beforePollingCycle(final BeforePollingCycleEvent event) throws InterruptedException {
-
-        notifyListeners(PollCycleListener.class, new Notifier<PollCycleListener>() {
-
-            @Override
-            public void notify(PollCycleListener listener) throws InterruptedException {
-                listener.beforePollingCycle(event);
-            }
-        });
+        notifyListeners(PollCycleListener.class, listener -> listener.beforePollingCycle(event));
     }
 
     void afterPollingCycle(final AfterPollingCycleEvent event) throws InterruptedException {
-
-        notifyListeners(PollCycleListener.class, new Notifier<PollCycleListener>() {
-
-            @Override
-            public void notify(PollCycleListener listener) throws InterruptedException {
-                listener.afterPollingCycle(event);
-            }
-        });
+        notifyListeners(PollCycleListener.class, listener -> listener.afterPollingCycle(event));
     }
 
     void fileAdded(final FileAddedEvent event) throws InterruptedException {
-
-        notifyListeners(DirectoryListener.class, new Notifier<DirectoryListener>() {
-
-            @Override
-            public void notify(DirectoryListener listener) throws InterruptedException {
-                listener.fileAdded(event);
-            }
-        });
+        notifyListeners(DirectoryListener.class, listener -> listener.fileAdded(event));
     }
 
     void fileRemoved(final FileRemovedEvent event) throws InterruptedException {
-
-        notifyListeners(DirectoryListener.class, new Notifier<DirectoryListener>() {
-
-            @Override
-            public void notify(DirectoryListener listener) throws InterruptedException {
-                listener.fileRemoved(event);
-            }
-        });
+        notifyListeners(DirectoryListener.class, listener -> listener.fileRemoved(event));
     }
 
     void fileModified(final FileModifiedEvent event) throws InterruptedException {
-
-        notifyListeners(DirectoryListener.class, new Notifier<DirectoryListener>() {
-
-            @Override
-            public void notify(DirectoryListener listener) throws InterruptedException {
-                listener.fileModified(event);
-            }
-        });
+        notifyListeners(DirectoryListener.class, listener -> listener.fileModified(event));
     }
 
     void ioErrorRaised(final IoErrorRaisedEvent event) throws InterruptedException {
-
-        notifyListeners(IoErrorListener.class, new Notifier<IoErrorListener>() {
-
-            @Override
-            public void notify(IoErrorListener listener) throws InterruptedException {
-                listener.ioErrorRaised(event);
-            }
-        });
+        notifyListeners(IoErrorListener.class, listener -> listener.ioErrorRaised(event));
     }
 
     void ioErrorCeased(final IoErrorCeasedEvent event) throws InterruptedException {
-
-        notifyListeners(IoErrorListener.class, new Notifier<IoErrorListener>() {
-
-            @Override
-            public void notify(IoErrorListener listener) throws InterruptedException {
-                listener.ioErrorCeased(event);
-            }
-        });
+        notifyListeners(IoErrorListener.class, listener -> listener.ioErrorCeased(event));
     }
 
     void afterStop(final AfterStopEvent event) {
-
         try {
-            notifyListeners(DirectoryPollerListener.class, new Notifier<DirectoryPollerListener>() {
-
-                @Override
-                public void notify(DirectoryPollerListener listener) throws InterruptedException {
-                    listener.afterStop(event);
-                }
-            });
+            notifyListeners(DirectoryPollerListener.class, listener -> listener.afterStop(event));
         } catch (InterruptedException e) {
             // ignore
         }
     }
 
     void beforeStart(final BeforeStartEvent event) {
-
         try {
-            notifyListeners(DirectoryPollerListener.class, new Notifier<DirectoryPollerListener>() {
-
-                @Override
-                public void notify(DirectoryPollerListener listener) throws InterruptedException {
-                    listener.beforeStart(event);
-                }
-            });
+            notifyListeners(DirectoryPollerListener.class, listener -> listener.beforeStart(event));
         } catch (InterruptedException e) {
             // ignore
         }
     }
 
     void initialContent(final InitialContentEvent event) throws InterruptedException {
-
-        notifyListeners(InitialContentListener.class, new Notifier<InitialContentListener>() {
-
-            @Override
-            public void notify(InitialContentListener listener) throws InterruptedException {
-                listener.initialContent(event);
-            }
-        });
+        notifyListeners(InitialContentListener.class, listener -> listener.initialContent(event));
     }
 
     private interface Notifier<T> {
-
         void notify(T listener) throws InterruptedException;
     }
 
