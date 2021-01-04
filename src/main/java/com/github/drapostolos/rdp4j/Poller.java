@@ -24,7 +24,7 @@ class Poller implements Callable<Object> {
     private final FileFilter filter;
     private final ListenerNotifier notifier;
     private boolean isFirstPollCycle = true;
-    private boolean isFileSystemUnaccessible = true;
+    private boolean isFileSystemAccessible = true; 
     private HashMapComparer<String, CachedFileElement> mapComparer;
     private final Map<String, CachedFileElement> currentListedFiles;
     private final Map<String, CachedFileElement> previousListedFiles;
@@ -81,7 +81,7 @@ class Poller implements Callable<Object> {
     }
 
     private boolean isFilesystemAccessible() {
-        return isFileSystemUnaccessible;
+        return isFileSystemAccessible;
     }
 
     private void setComparerForCurrentVersusPreviousListedFiles() {
@@ -118,13 +118,13 @@ class Poller implements Callable<Object> {
             Map<String, CachedFileElement> temp = filterFiles(files);
             if (isFilesystemUnaccessible()) {
                 notifier.ioErrorCeased(new IoErrorCeasedEvent(dp, directory));
-                isFileSystemUnaccessible = true;
+                isFileSystemAccessible = true;
             }
             currentListedFiles.clear();
             currentListedFiles.putAll(temp);
         } catch (IOException e) {
             if (isFilesystemAccessible()) {
-                isFileSystemUnaccessible = false;
+                isFileSystemAccessible = false;
                 notifier.ioErrorRaised(new IoErrorRaisedEvent(dp, directory, e));
             }
         } catch (DirectoryPollerException e) {
