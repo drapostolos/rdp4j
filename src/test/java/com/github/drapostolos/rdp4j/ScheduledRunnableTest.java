@@ -28,7 +28,7 @@ public class ScheduledRunnableTest extends EventVerifier {
         inOrder = Mockito.inOrder(listenerMock);
         directoryPollerMock = Mockito.mock(DirectoryPoller.class);
         Mockito.when(directoryPollerMock.getDefaultFileFilter()).thenReturn(new DefaultFileFilter());
-        directories.add(directoryMock);
+        directories.put(directoryMock, new HashSet<>());
         directoryPollerMock.directories = directories;
         directoryPollerMock.notifier = new ListenerNotifier(new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
         pollerTask = new ScheduledRunnable(directoryPollerMock);
@@ -302,12 +302,12 @@ public class ScheduledRunnableTest extends EventVerifier {
                 .thenReturn(list("fileA/1", "fileB/1"))
                 .thenReturn(list("fileA/1", "fileB/1"));
 
-        final List<FileElement> files = new ArrayList<FileElement>();
+        final List<FileElement> files = new ArrayList<>();
         Mockito.doAnswer(new Answer<InitialContentEvent>() {
 
             @Override
             public InitialContentEvent answer(InvocationOnMock invocation) throws Throwable {
-                Set<FileElement> s = ((InitialContentEvent) invocation.getArguments()[0]).getFiles();
+                Set<FileElement> s = ((InitialContentEvent) invocation.getArguments()[0]).getFileElements();
                 files.addAll(s);
                 return null;
             }

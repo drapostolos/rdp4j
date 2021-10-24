@@ -1,9 +1,12 @@
 package com.github.drapostolos.rdp4j;
 
+import static java.util.Arrays.asList;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -17,10 +20,9 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class DirectoryPollerBuilder {
-
     private static final String NULL_ARGUMENT_ERROR_MESSAGE = "null argument not allowed!";
     static final String DEFAULT_THREAD_NAME = "DirectoryPoller-";
-    Set<PolledDirectory> directories = new LinkedHashSet<PolledDirectory>();
+    Map<PolledDirectory, Set<CachedFileElement>> directories = new HashMap<>();
 
     // Optional settings, with default values:
     long pollingIntervalInMillis = 1000;
@@ -63,6 +65,27 @@ public final class DirectoryPollerBuilder {
         parallelDirectoryPollingEnabled = true;
         return this;
     }
+    
+	/**
+     * Adds the given <code>directory</code> to the list of polled directories.
+     * Mandatory to add at least one directory.
+     * <p>
+     * Once the {@link DirectoryPoller} has been built, it can be used to add
+     * additional polled directories, or remove polled directories.
+     * <p>
+     * Optional to add {@link CachedFileElement}s that already exists in the
+     * given <code>directory</code> and represent a state of a previous running
+     * {@link DirectoryPoller}.
+     * 
+     * @param directory - the directory to poll.
+	 * @param previousState - Any files/dirs that was known by a previous running {@link DirectoryPoller}
+     * @throws NullPointerException - if the given argument is null.
+     * @return {@link DirectoryPollerBuilder}
+     * 
+	 */
+    public DirectoryPollerBuilder addPolledDirectory(PolledDirectory directory, CachedFileElement... previousState ) {
+    	return addPolledDirectory(directory, new HashSet<>(asList(previousState)));
+    }
 
     /**
      * Adds the given <code>directory</code> to the list of polled directories.
@@ -70,16 +93,26 @@ public final class DirectoryPollerBuilder {
      * <p>
      * Once the {@link DirectoryPoller} has been built, it can be used to add
      * additional polled directories, or remove polled directories.
+     * <p>
+     * Optional to add {@link CachedFileElement}s that already exists in the
+     * given <code>directory</code> and represent a state of a previous running
+     * {@link DirectoryPoller}.
      * 
      * @param directory - the directory to poll.
+	 * @param previousState - Any files/dirs that was known by a previous running {@link DirectoryPoller}
      * @throws NullPointerException - if the given argument is null.
      * @return {@link DirectoryPollerBuilder}
-     */
-    public DirectoryPollerBuilder addPolledDirectory(PolledDirectory directory) {
+     * 
+	 */
+    public DirectoryPollerBuilder addPolledDirectory(PolledDirectory directory, Set<CachedFileElement> previousState) {
         if (directory == null) {
             throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
         }
-        directories.add(directory);
+        if (previousState == null) {
+            throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
+        }
+        directories.putIfAbsent(directory, new LinkedHashSet<>());
+        directories.get(directory).addAll(previousState);
         return this;
     }
 
@@ -185,18 +218,16 @@ public final class DirectoryPollerBuilder {
     }
 
     private DirectoryPollerFuture future() {
-        final DirectoryPoller dp = new DirectoryPoller(this);
-
-        Future<DirectoryPoller> f = Util.invokeTask("DP-BeforeStart", new Callable<DirectoryPoller>() {
-
-            @Override
-            public DirectoryPoller call() {
-                dp.notifier.beforeStart(new BeforeStartEvent());
-                dp.start();
-                return dp;
-            }
-
-        });
+		Future<DirectoryPoller> f = Util.invokeTask("DP-BeforeStart", () -> {
+			ListenerNotifier notifier = new ListenerNotifier(listeners);
+			notifier.beforeStart(new BeforeStartEvent(this));
+			/*
+			 * The DirectoryPoller must be constructed after triggering
+			 * "BeforeStartEvent", as registered listeners can add additional
+			 * polled directories.
+			 */
+			return new DirectoryPoller(notifier, this).start();
+		});
         return new DirectoryPollerFuture(f);
     }
 }

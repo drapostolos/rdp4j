@@ -9,6 +9,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * 
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
+@FunctionalInterface
 public interface FileFilter {
 
     /**

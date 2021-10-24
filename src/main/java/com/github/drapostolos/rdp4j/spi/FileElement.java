@@ -47,7 +47,10 @@ public interface FileElement {
      * @return true if this {@link FileElement} instance represents a
      *         directory, otherwise false.
      */
-    boolean isDirectory();
+    default boolean isDirectory() {
+    	return false;
+    }
+    
 
     /**
      * Returns the name of this {@link FileElement}.

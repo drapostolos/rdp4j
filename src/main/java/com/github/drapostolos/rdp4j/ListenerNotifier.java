@@ -55,6 +55,7 @@ class ListenerNotifier {
         try {
             notifyListeners(DirectoryPollerListener.class, listener -> listener.afterStop(event));
         } catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
             // ignore
         }
     }
@@ -63,6 +64,7 @@ class ListenerNotifier {
         try {
             notifyListeners(DirectoryPollerListener.class, listener -> listener.beforeStart(event));
         } catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
             // ignore
         }
     }
@@ -84,12 +86,7 @@ class ListenerNotifier {
             throws InterruptedException {
         for (Rdp4jListener listener : listeners) {
             if (isInstanceOf(listener, listenerType)) {
-                /*
-                 * This cast is correct, since we check if listener
-                 * is instance of listenerType.
-                 */
-                @SuppressWarnings("unchecked")
-                T listener2 = (T) listener;
+                T listener2 = listenerType.cast(listener);
                 try {
                     notifier.notify(listener2);
                 } catch (InterruptedException e) {

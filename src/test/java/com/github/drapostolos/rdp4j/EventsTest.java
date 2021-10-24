@@ -34,13 +34,15 @@ public class EventsTest {
         // given
         DirectoryPoller dp = Mockito.mock(DirectoryPoller.class);
         PolledDirectory directory = Mockito.mock(PolledDirectory.class);
-        FileElement file = Mockito.mock(FileElement.class);
+        FileElement fileElement = Mockito.mock(FileElement.class);
+        CachedFileElement cachedFileElement = CachedFileElement.of(fileElement);
 
         // when
-        FileAddedEvent event = new FileAddedEvent(dp, directory, file);
+        FileAddedEvent event = new FileAddedEvent(dp, directory, new FileElementAndCache(fileElement, cachedFileElement));
 
         // then
-        assertThat(event.getFileElement()).isEqualTo(file);
+        assertThat(event.getFileElement()).isEqualTo(fileElement);
+        assertThat(event.getCachedFileElement()).isEqualTo(cachedFileElement);
         assertThat(event.getPolledDirectory()).isEqualTo(directory);
         assertThat(event.getDirectoryPoller()).isEqualTo(dp);
 

@@ -1,14 +1,17 @@
 package com.github.drapostolos.rdp4j;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,33 +23,25 @@ class Poller implements Callable<Object> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledRunnable.class);
     final PolledDirectory directory;
-    private final List<CachedFileElement> modifiedFiles = new ArrayList<CachedFileElement>();
+    private final List<FileElementAndCache> modifiedFiles = new ArrayList<>();
     private final FileFilter filter;
     private final ListenerNotifier notifier;
     private boolean isFirstPollCycle = true;
     private boolean isFileSystemAccessible = true; 
-    private HashMapComparer<String, CachedFileElement> mapComparer;
-    private final Map<String, CachedFileElement> currentListedFiles;
-    private final Map<String, CachedFileElement> previousListedFiles;
+    private HashMapComparer<String, FileElementAndCache> mapComparer;
+    final Map<String, FileElementAndCache> currentListedFiles;
+    private final Map<String, FileElementAndCache> previousListedFiles;
     private final DirectoryPoller dp;
 
-    Poller(DirectoryPoller dp, PolledDirectory directory) {
-        this(dp, directory, Util.newLinkedHashMap(), Util.newLinkedHashMap());
-    }
-
-    /*
-     * Use this constructor when letting client provide snapshot of last poll,
-     * from a previous DirectoryPoller instance.
-     */
-    private Poller(DirectoryPoller dp, PolledDirectory directory,
-            Map<String, CachedFileElement> currentListedFiles,
-            Map<String, CachedFileElement> previousListedFiles) {
+    Poller(DirectoryPoller dp, PolledDirectory directory, Set<CachedFileElement> previousListedFiles) {
         this.dp = dp;
         this.directory = directory;
         this.filter = dp.getDefaultFileFilter();
         this.notifier = dp.notifier;
-        this.currentListedFiles = currentListedFiles;
-        this.previousListedFiles = previousListedFiles;
+        this.currentListedFiles = new LinkedHashMap<>();
+        this.previousListedFiles = previousListedFiles.stream()
+        		.map(file -> new FileElementAndCache(file, file))
+        		.collect(toMap(e ->e.getName(), e -> e, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     @Override
@@ -59,7 +54,7 @@ class Poller implements Callable<Object> {
                 doActionsSpecificForFirstPollCycle();
                 isFirstPollCycle = false;
             } else {
-                doActionsForRemainingPollCycles();
+                notifyListenersWithRemovedAddedModifiedFiles();
             }
             if (isDirectoryModified()) {
                 copyCurrentListedFilesToPrevious();
@@ -71,13 +66,12 @@ class Poller implements Callable<Object> {
     private void doActionsSpecificForFirstPollCycle() throws InterruptedException {
         if (dp.fileAddedEventEnabledForInitialContent) {
             // make sure this events fires before InitialContentEvent
-            notifyListenersWithRemovedAddedModifiedFiles();
+            notifyIfNeeded(notifier::fileAdded, file -> new FileAddedEvent(dp, directory, file), currentListedFiles.values());
         }
-        dp.notifier.initialContent(new InitialContentEvent(dp, directory, currentListedFiles));
-    }
-
-    private void doActionsForRemainingPollCycles() throws InterruptedException {
-        notifyListenersWithRemovedAddedModifiedFiles();
+        dp.notifier.initialContent(new InitialContentEvent(dp, directory, currentListedFiles.values()));
+        if(!previousListedFiles.isEmpty()) {
+        	notifyListenersWithRemovedAddedModifiedFiles();
+        }
     }
 
     private boolean isFilesystemAccessible() {
@@ -85,19 +79,19 @@ class Poller implements Callable<Object> {
     }
 
     private void setComparerForCurrentVersusPreviousListedFiles() {
-        mapComparer = new HashMapComparer<String, CachedFileElement>(previousListedFiles, currentListedFiles);
+        mapComparer = new HashMapComparer<>(previousListedFiles, currentListedFiles);
     }
 
     private void detectAndCollectModifiedFiles() {
         modifiedFiles.clear();
-        for (CachedFileElement f : currentListedFiles.values()) {
+        for (FileElementAndCache f : currentListedFiles.values()) {
             if (isFileModified(f)) {
                 modifiedFiles.add(f);
             }
         }
     }
 
-    private boolean isFileModified(CachedFileElement file) {
+    private boolean isFileModified(FileElementAndCache file) {
         if (previousListedFiles.containsKey(file.getName())) {
             long current = file.lastModified();
             long previous = previousListedFiles.get(file.getName()).lastModified();
@@ -115,7 +109,7 @@ class Poller implements Callable<Object> {
                 throw new IOException(String.format(message, directory));
             }
 
-            Map<String, CachedFileElement> temp = filterFiles(files);
+            Map<String, FileElementAndCache> temp = filterFiles(files);
             if (isFilesystemUnaccessible()) {
                 notifier.ioErrorCeased(new IoErrorCeasedEvent(dp, directory));
                 isFileSystemAccessible = true;
@@ -140,18 +134,17 @@ class Poller implements Callable<Object> {
         }
     }
 
-    private Map<String, CachedFileElement> filterFiles(Set<FileElement> files) throws IOException {
-        Map<String, CachedFileElement> result = new LinkedHashMap<String, CachedFileElement>();
+    private Map<String, FileElementAndCache> filterFiles(Set<FileElement> files) throws IOException {
+        Map<String, FileElementAndCache> result = new LinkedHashMap<>();
         for (FileElement file : files) {
             if (filter.accept(file)) {
-                long lastModified = file.lastModified();
-                if (lastModified == 0L) {
+            	FileElementAndCache cache = new FileElementAndCache(file, CachedFileElement.of(file));
+                if (cache.lastModified() == 0L) {
                     String message = "Unknown underlying IO-Error. "
                             + "Method 'lastModified()' returned '0L' for file '%s'";
                     throw new IOException(format(message, file));
                 }
-                String name = file.getName();
-                result.put(name, new CachedFileElement(file, name, lastModified));
+                result.put(cache.getName(), cache);
             }
         }
         return result;
@@ -166,15 +159,19 @@ class Poller implements Callable<Object> {
     }
 
     private void notifyListenersWithRemovedAddedModifiedFiles() throws InterruptedException {
-        for (CachedFileElement file : mapComparer.getRemoved().values()) {
-            notifier.fileRemoved(new FileRemovedEvent(dp, directory, file.fileElement));
+        notifyIfNeeded(notifier::fileRemoved, file -> new FileRemovedEvent(dp, directory, file), mapComparer.getRemoved().values());
+        notifyIfNeeded(notifier::fileAdded, file -> new FileAddedEvent(dp, directory, file), mapComparer.getAdded().values());
+        notifyIfNeeded(notifier::fileModified, file -> new FileModifiedEvent(dp, directory, file), modifiedFiles);
+    }
+    
+    private <T> void notifyIfNeeded(Notifier<T> notifier, Function<FileElementAndCache, T> event, Collection<FileElementAndCache> files) throws InterruptedException {
+    	for (FileElementAndCache file : files) {
+        	notifier.notify(event.apply(file));
         }
-        for (CachedFileElement file : mapComparer.getAdded().values()) {
-            notifier.fileAdded(new FileAddedEvent(dp, directory, file.fileElement));
-        }
-        for (CachedFileElement file : modifiedFiles) {
-            notifier.fileModified(new FileModifiedEvent(dp, directory, file.fileElement));
-        }
+	}
+    
+    private interface Notifier<T> {
+    	void notify(T event) throws InterruptedException;
     }
 
     private void copyCurrentListedFilesToPrevious() {
@@ -206,5 +203,9 @@ class Poller implements Callable<Object> {
             return false;
         return true;
     }
+
+	PolledDirectory getPolledDirectory() {
+		return directory;
+	}
 
 }

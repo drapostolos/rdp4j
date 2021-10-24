@@ -1,6 +1,5 @@
 package com.github.drapostolos.rdp4j;
 
-import com.github.drapostolos.rdp4j.spi.FileElement;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
@@ -10,7 +9,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 public final class FileRemovedEvent extends EventExposingFileElement {
 
-    FileRemovedEvent(DirectoryPoller directoryPoller, PolledDirectory directory, FileElement file) {
+    FileRemovedEvent(DirectoryPoller directoryPoller, PolledDirectory directory, FileElementAndCache file) {
         super(directoryPoller, directory, file);
     }
 

@@ -35,7 +35,7 @@ public class CachedFileElementTest {
 
     @Before
     public void testName() throws Exception {
-        cached = new CachedFileElement(fileElement, name, lastModified);
+        cached = CachedFileElement.of(fileElement);
     }
 
     @Test
@@ -49,19 +49,13 @@ public class CachedFileElementTest {
     }
 
     @Test
-    public void canHoldFileElement() throws Exception {
-        assertThat(cached.fileElement).isEqualTo(fileElement);
-    }
-
-    @Test
     public void canHoldDirectory() throws Exception {
-        isDirectory = true;
-        assertThat(cached.isDirectory()).isEqualTo(true);
+        assertThat(CachedFileElement.ofDir(name, lastModified).isDirectory()).isTrue();
     }
 
     @Test
     public void canHoldNoneDirectory() throws Exception {
-        assertThat(cached.isDirectory()).isEqualTo(false);
+        assertThat(cached.isDirectory()).isFalse();
     }
 
 }
