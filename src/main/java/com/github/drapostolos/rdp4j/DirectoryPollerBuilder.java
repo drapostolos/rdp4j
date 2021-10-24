@@ -2,6 +2,7 @@ package com.github.drapostolos.rdp4j;
 
 import static java.util.Arrays.asList;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -9,8 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import com.github.drapostolos.rdp4j.spi.FileElement;
+import com.github.drapostolos.rdp4j.spi.Persister;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 /**
@@ -34,6 +37,41 @@ public final class DirectoryPollerBuilder {
 
     DirectoryPollerBuilder() { // package-private access only.
     }
+
+    /**
+     * Enables a simple mechanism that persist the {@link PolledDirectory}'s state to 
+     * the given <code>file</code>. As this library has no knowledge how to convert your
+     * {@link PolledDirectory} implementation to and from a string, the client needs to 
+     * supply the converter functions {@code dirToString} and <code>stringToDir</code>.
+     * 
+     * @see DirectoryPollerBuilder#enableStatePersisting(Persister)
+     * 
+     * @param file the files where to store persisted data.
+     * @param dirToString a function that converts your {@link PolledDirectory} implementations to a string.
+     * @param stringToDir a function that converts a string (as produced by <code>dirToString</code>) 
+     * to an implementation of your {@link PolledDirectory}.
+     * @return {@link DirectoryPollerBuilder}
+     */
+	public DirectoryPollerBuilder enableDefaultStatePersisting(Path file, 
+			Function<PolledDirectory, String> dirToString, Function<String, PolledDirectory> stringToDir) {
+		return enableStatePersisting(new SerializeToFilePersister(file, stringToDir, dirToString));
+	}
+
+	/**
+	 * Provide your own {@link Persister} implementation. Any existing persisted data 
+	 * will be read in {@link DirectoryPollerListener#beforeStart(BeforeStartEvent)}, i.e.
+	 * before the {@link DirectoryPoller} starts.
+	 * <p>
+	 * The state of each {@link PolledDirectory} will be persisted in {@link DirectoryPollerListener#afterStop(AfterStopEvent)},
+	 * i.e. after the {@link DirectoryPoller} has stopped.
+	 * 
+	 * @param persister Custom implementation of the {@link Persister} interface.
+     * @return {@link DirectoryPollerBuilder}
+	 */
+	public DirectoryPollerBuilder enableStatePersisting(Persister persister) {
+		addListener(new StatePersister(persister));
+		return this;
+	}
 
     /**
      * Enable {@link FileAddedEvent} events to be fired for the initial
