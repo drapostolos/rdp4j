@@ -7,7 +7,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.never;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -31,6 +37,8 @@ public class AcceptanceTest extends EventVerifier {
 
     private DirectoryPoller dp;
     private DirectoryPollerBuilder builder;
+	Path storage = Paths.get("rdp4j");
+	Path tempDir;
 
     @Before
     public void testFixture() throws Exception {
@@ -45,7 +53,64 @@ public class AcceptanceTest extends EventVerifier {
         if (dp != null && !dp.isTerminated()) {
             dp.stop();
         }
+		Files.deleteIfExists(storage);
+		if(tempDir != null && Files.exists(tempDir)) {
+			Files.list(tempDir).forEach(t -> {
+				try {
+					Files.delete(t);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+			Files.delete(tempDir);
+		}
     }
+    
+    @Test
+	public void canPersistStateToFile() throws Exception {
+		Files.deleteIfExists(storage);
+		tempDir = Files.createTempDirectory("rdp4j");
+		ArrayList<String> names = new ArrayList<>();
+		
+		DirectoryPollerBuilder builder = DirectoryPoller.newBuilder()
+		.addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(2))
+        .setPollingInterval(20, TimeUnit.MILLISECONDS)
+		.addPolledDirectory(new JavaIoFileAdapter(tempDir.toFile()))
+		.addListener(new AbstractRdp4jListener() {
+			boolean filesAdded = false;
+			public void fileAdded(FileAddedEvent event) throws InterruptedException {
+				names.add(event.getCachedFileElement().getName());
+			};
+			public void fileRemoved(FileRemovedEvent event) throws InterruptedException {
+				names.remove(event.getCachedFileElement().getName());
+			};
+			public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
+				if(!filesAdded) {
+					try {
+						// Make sure to add files during polling, hence here.
+						Files.createFile(tempDir.resolve("file1"));
+						Files.createFile(tempDir.resolve("file2"));
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+					filesAdded = true;
+				}
+			};
+		})
+		.enableDefaultStatePersisting(storage, 
+				polledDir -> ((JavaIoFileAdapter)polledDir).getFile().toString(), 
+				str -> new JavaIoFileAdapter(new File(str)));
+		builder.start()
+		.awaitTermination();
+		
+		Files.createFile(tempDir.resolve("file3"));
+		Files.delete(tempDir.resolve("file2"));
+		assertThat(names).containsOnly("file1", "file2");
+		
+		builder.start()
+		.awaitTermination();
+		assertThat(names).containsOnly("file1", "file3");
+	}
 
     @Test
 	public void canGetCurrentFilesFromAfterStopEvent() throws Exception {

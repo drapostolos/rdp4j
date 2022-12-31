@@ -29,7 +29,8 @@ final class Util {
                 return;
             } catch (InterruptedException e) {
             	Thread.currentThread().interrupt();
-                LOG.warn("Thread interrupted, but ignored.");
+                LOG.info("Thread interrupted");
+                break;
             }
         }
     }
