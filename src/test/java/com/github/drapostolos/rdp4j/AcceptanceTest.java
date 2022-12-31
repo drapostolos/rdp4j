@@ -1,13 +1,22 @@
 package com.github.drapostolos.rdp4j;
 
+import static com.github.drapostolos.rdp4j.CachedFileElement.ofFile;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.never;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 
 import com.github.drapostolos.rdp4j.spi.FileElement;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
@@ -27,6 +37,8 @@ public class AcceptanceTest extends EventVerifier {
 
     private DirectoryPoller dp;
     private DirectoryPollerBuilder builder;
+	Path storage = Paths.get("rdp4j");
+	Path tempDir;
 
     @Before
     public void testFixture() throws Exception {
@@ -41,7 +53,221 @@ public class AcceptanceTest extends EventVerifier {
         if (dp != null && !dp.isTerminated()) {
             dp.stop();
         }
+		Files.deleteIfExists(storage);
+		if(tempDir != null && Files.exists(tempDir)) {
+			Files.list(tempDir).forEach(t -> {
+				try {
+					Files.delete(t);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+			Files.delete(tempDir);
+		}
     }
+    
+    @Test
+	public void canPersistStateToFile() throws Exception {
+		Files.deleteIfExists(storage);
+		tempDir = Files.createTempDirectory("rdp4j");
+		ArrayList<String> names = new ArrayList<>();
+		
+		DirectoryPollerBuilder builder = DirectoryPoller.newBuilder()
+		.addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(2))
+        .setPollingInterval(20, TimeUnit.MILLISECONDS)
+		.addPolledDirectory(new JavaIoFileAdapter(tempDir.toFile()))
+		.addListener(new AbstractRdp4jListener() {
+			boolean filesAdded = false;
+			public void fileAdded(FileAddedEvent event) throws InterruptedException {
+				names.add(event.getCachedFileElement().getName());
+			};
+			public void fileRemoved(FileRemovedEvent event) throws InterruptedException {
+				names.remove(event.getCachedFileElement().getName());
+			};
+			public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
+				if(!filesAdded) {
+					try {
+						// Make sure to add files during polling, hence here.
+						Files.createFile(tempDir.resolve("file1"));
+						Files.createFile(tempDir.resolve("file2"));
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+					filesAdded = true;
+				}
+			};
+		})
+		.enableDefaultStatePersisting(storage, 
+				polledDir -> ((JavaIoFileAdapter)polledDir).getFile().toString(), 
+				str -> new JavaIoFileAdapter(new File(str)));
+		builder.start()
+		.awaitTermination();
+		
+		Files.createFile(tempDir.resolve("file3"));
+		Files.delete(tempDir.resolve("file2"));
+		assertThat(names).containsOnly("file1", "file2");
+		
+		builder.start()
+		.awaitTermination();
+		assertThat(names).containsOnly("file1", "file3");
+	}
+
+    @Test
+	public void canGetCurrentFilesFromAfterStopEvent() throws Exception {
+        // given 
+        mockAndReturn(directoryMock.listFiles(), 
+        		list("a.txt/12", "b.xml/11"), list("a.txt/13", "b.xml/11"));
+        Map<PolledDirectory, Set<CachedFileElement>> cachedFilesPerDir = new HashMap<>();
+        Map<PolledDirectory, Set<FileElement>> filesPerDir = new HashMap<>();
+        
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock)
+                .addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(2))
+                .addListener(new AbstractRdp4jListener() {
+                	@Override
+                	public void afterStop(AfterStopEvent event) {
+                		cachedFilesPerDir.putAll(event.getCachedFileElements());
+                		filesPerDir.putAll(event.getFileElements());
+                	}
+                })
+                .setPollingInterval(20, TimeUnit.MILLISECONDS)
+                .start();
+        dp.awaitTermination();
+        
+        // then
+        assertThat(cachedFilesPerDir).hasSize(1);
+        assertThat(cachedFilesPerDir.get(directoryMock)).isNotNull();
+        assertThat(cachedFilesPerDir.get(directoryMock)).hasSize(2);
+        assertThat(cachedFilesPerDir.get(directoryMock)).containsOnly(
+        		ofFile("a.txt", 13), ofFile("b.xml", 11));
+        assertThat(filesPerDir).hasSize(1);
+        assertThat(filesPerDir.get(directoryMock)).isNotNull();
+        assertThat(filesPerDir.get(directoryMock)).hasSize(2);
+        assertThat(filesPerDir.get(directoryMock)).containsAll(
+        		list("a.txt/13", "b.xml/11"));
+	}
+
+	@Test
+	public void canStartWithKnownFolderState() throws Exception {
+        // given 
+        mockAndReturn(directoryMock.listFiles(), 
+        		list("a.txt/12", "b.xml/12", "d.doc/12"), 
+        		list("a.txt/13", "b.xml/12"));
+        
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock, ofFile("c.txt", 12))
+                .addPolledDirectory(directoryMock, ofFile("a.txt", 12))
+                .addListener(new AbstractRdp4jListener() {
+                	@Override
+                	public void beforeStart(BeforeStartEvent event) {
+                		event.addPolledDirectory(directoryMock, ofFile("b.xml", 11));
+                	}
+                })
+        		.addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(2))
+        		.addListener(listenerMock)
+                .setPollingInterval(20, TimeUnit.MILLISECONDS)
+                .start();
+        dp.awaitTermination();
+        
+        // then
+        verifyEventsInOrder(
+                BeforeStartEvent.class,
+                // First poll cycle
+                BeforePollingCycleEvent.class,
+                InitialContentEvent.class,
+                FileRemovedEvent.class,
+                FileAddedEvent.class,
+                FileModifiedEvent.class,
+                AfterPollingCycleEvent.class,
+                // second poll cycle
+                BeforePollingCycleEvent.class,
+                FileRemovedEvent.class,
+                FileModifiedEvent.class,
+                AfterPollingCycleEvent.class,
+
+                AfterStopEvent.class);
+        Mockito.verifyNoMoreInteractions(listenerMock);
+	}
+
+	@Test
+	public void canStartWithKnownFolderStateWhenInitialContentEnabled() throws Exception {
+        // given 
+        mockAndReturn(directoryMock.listFiles(), 
+        		list("a.txt/12", "b.xml/12", "d.doc/12"), 
+        		list("a.txt/13", "b.xml/12"));
+        
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock, ofFile("a.txt", 12), ofFile("b.xml", 11), ofFile("c.txt", 12))
+        		.addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(2))
+        		.addListener(listenerMock)
+        		.enableFileAddedEventsForInitialContent()
+                .setPollingInterval(20, TimeUnit.MILLISECONDS)
+                .start();
+        dp.awaitTermination();
+        
+        // then
+        verifyEventsInOrder(
+                BeforeStartEvent.class,
+                // First poll cycle
+                BeforePollingCycleEvent.class,
+                FileAddedEvent.class,
+                FileAddedEvent.class,
+                FileAddedEvent.class,
+                InitialContentEvent.class,
+                FileRemovedEvent.class,
+                FileAddedEvent.class,
+                FileModifiedEvent.class,
+                AfterPollingCycleEvent.class,
+                // second poll cycle
+                BeforePollingCycleEvent.class,
+                FileRemovedEvent.class,
+                FileModifiedEvent.class,
+                AfterPollingCycleEvent.class,
+
+                AfterStopEvent.class);
+        Mockito.verifyNoMoreInteractions(listenerMock);
+	}
+
+    @SafeVarargs
+	private final void mockAndReturn(Set<FileElement> mockAction, Set<FileElement> first, Set<FileElement>... rest) {
+        Mockito.when(mockAction).thenReturn(first, rest);
+	}
+
+	@Test
+	public void canGetFileElementImplementationFromFileAddedEvent() throws Exception {
+        // given 
+        @SuppressWarnings({ "unchecked", "unused" })
+        /*
+         * store it in a variable so the @SuppressWarnings annotation can be placed on 
+         * this smaller scope instead of entire method.
+         */
+		OngoingStubbing<Set<FileElement>> thenReturn = Mockito.when(directoryMock.listFiles())
+                .thenReturn(list("a.txt/12", "b.xml/11"), list("a.txt/13", "b.xml/11"));
+        Set<FileElement> initialFiles = new LinkedHashSet<>();
+        
+        // when
+        dp = builder
+                .addPolledDirectory(directoryMock)
+        		.addListener(new PollCycleCounter().stopPollingAfterNumOfCycles(2))
+        		.enableFileAddedEventsForInitialContent()
+                .addListener(new AbstractRdp4jListener() {
+                	
+                	@Override
+                	public void fileAdded(FileAddedEvent event) throws InterruptedException {
+                		initialFiles.add(event.getFileElement());
+                	}
+                	
+				})
+                .setPollingInterval(20, TimeUnit.MILLISECONDS)
+                .start();
+        dp.awaitTermination();
+        
+        // then
+        assertThat(initialFiles.stream().findFirst().get()).isInstanceOf(StubbedFileElement.class);
+	}
 
     @Test(timeout = 1000)
     public void canInterruptBeforePollingCycle() throws Exception {
@@ -370,7 +596,6 @@ public class AcceptanceTest extends EventVerifier {
         Assertions.assertThat(dp.getPolledDirectories()).isEmpty();
     }
 
-    // listenerCanReceiveFileAddedEventWhenListenerAddedAfterStart
     @Test
     public void listenerCanReceiveFileAddedEventWhenListenerAddedAfterStart() throws Exception {
         // given 
@@ -474,7 +699,7 @@ public class AcceptanceTest extends EventVerifier {
 
             @Override
             public InitialContentEvent answer(InvocationOnMock invocation) throws Throwable {
-                Set<FileElement> s = ((InitialContentEvent) invocation.getArguments()[0]).getFiles();
+                Set<FileElement> s = ((InitialContentEvent) invocation.getArguments()[0]).getFileElements();
                 files.addAll(s);
                 return null;
             }

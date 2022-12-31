@@ -1,8 +1,12 @@
 package com.github.drapostolos.rdp4j;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 public class DirectoryPollerBuilderTest {
 
@@ -11,6 +15,18 @@ public class DirectoryPollerBuilderTest {
     @Test(expected = NullPointerException.class)
     public void nullDirectory() throws Exception {
         builder.addPolledDirectory(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void nullPreviousState() throws Exception {
+    	Set<CachedFileElement> previousState = null;
+        builder.addPolledDirectory(Mockito.mock(PolledDirectory.class), previousState);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void nullPreviousStateVarArg() throws Exception {
+    	CachedFileElement[] previousState = null;
+        builder.addPolledDirectory(Mockito.mock(PolledDirectory.class), previousState);
     }
 
     @Test(expected = NullPointerException.class)

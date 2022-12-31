@@ -1,6 +1,9 @@
 package com.github.drapostolos.rdp4j;
 
-import java.util.HashSet;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
@@ -18,19 +21,18 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * or if IO Error has been raised/ceased.
  */
 final class ScheduledRunnable implements Runnable {
-
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledRunnable.class);
+    final CopyOnWriteArraySet<Poller> pollers;
     private final DirectoryPoller dp;
-    private final Set<Poller> pollers = new CopyOnWriteArraySet<Poller>();
     private final ListenerNotifier notifier;
     private final ExecutorService executor;
 
     ScheduledRunnable(DirectoryPoller directoryPoller) {
         dp = directoryPoller;
         this.notifier = dp.notifier;
-        for (PolledDirectory directory : dp.directories) {
-            pollers.add(new Poller(dp, directory));
-        }
+        pollers = dp.directories.entrySet().stream()
+        .map(e -> new Poller(dp, e.getKey(), e.getValue()))
+        .collect(toCollection(CopyOnWriteArraySet::new));
         if (dp.parallelDirectoryPollingEnabled) {
             executor = Executors.newCachedThreadPool();
         } else {
@@ -65,11 +67,11 @@ final class ScheduledRunnable implements Runnable {
     }
 
     void addDirectory(PolledDirectory directory) {
-        pollers.add(new Poller(dp, directory));
+        pollers.add(new Poller(dp, directory, new LinkedHashSet<>()));
     }
 
     void removeDirectory(PolledDirectory directory) {
-        pollers.remove(new Poller(dp, directory));
+        pollers.remove(new Poller(dp, directory, new LinkedHashSet<>()));
     }
 
     void shutdown() {
@@ -81,11 +83,9 @@ final class ScheduledRunnable implements Runnable {
     }
 
     Set<PolledDirectory> getDirectories() {
-        Set<PolledDirectory> result = new HashSet<PolledDirectory>();
-        for (Poller poller : pollers) {
-            result.add(poller.directory);
-        }
-        return result;
+    	return pollers.stream()
+    	.map(Poller::getPolledDirectory)
+    	.collect(toSet());
     }
 
 }

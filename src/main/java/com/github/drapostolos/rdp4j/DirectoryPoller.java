@@ -3,7 +3,8 @@ package com.github.drapostolos.rdp4j;
 import static com.github.drapostolos.rdp4j.DirectoryPollerBuilder.DEFAULT_THREAD_NAME;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.util.LinkedHashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -39,31 +40,38 @@ public class DirectoryPoller {
 
     private static final String NULL_ARGUMENT_ERROR = "Argument is null.";
     private static final long WITH_NO_DELAY = 0;
-    private static AtomicInteger threadCount = new AtomicInteger();
+    private static final AtomicInteger threadCount = new AtomicInteger();
     private volatile boolean shouldInvokeShutdownTask = true;
+    private final FileFilter filter;
+    private final long pollingIntervalInMillis;
+    private final String threadName;
+    private final CountDownLatch latch = new CountDownLatch(1);
+    private final ScheduledExecutorService executor;
     private ScheduledRunnable scheduledRunnable;
-    private FileFilter filter;
-    private long pollingIntervalInMillis;
-    private String threadName;
-    private CountDownLatch latch = new CountDownLatch(1);
-    private ScheduledExecutorService executor;
 
-    // Below are passed to PollerTask
+    // Below are passed to PollerTask and changed by unit tests
     ListenerNotifier notifier;
     boolean fileAddedEventEnabledForInitialContent;
     boolean parallelDirectoryPollingEnabled;
-    Set<PolledDirectory> directories;
+    Map<PolledDirectory, Set<CachedFileElement>> directories;
+
+	/**
+     * @return a new {@link DirectoryPollerBuilder}.
+     */
+    public static DirectoryPollerBuilder newBuilder() {
+        return new DirectoryPollerBuilder();
+    }
 
     /* package-private access only */
-    DirectoryPoller(DirectoryPollerBuilder builder) {
+    DirectoryPoller(ListenerNotifier notifier, DirectoryPollerBuilder builder) {
         // First copy values from builder...
-        directories = new LinkedHashSet<>(builder.directories);
+        directories = new HashMap<>(builder.directories);
         filter = builder.filter;
         pollingIntervalInMillis = builder.pollingIntervalInMillis;
-        threadName = builder.threadName;
+        threadName = addCounterIfDefaultThreadName(builder.threadName);
         fileAddedEventEnabledForInitialContent = builder.fileAddedEventEnabledForInitialContent;
         parallelDirectoryPollingEnabled = builder.parallelDirectoryPollingEnabled;
-        notifier = new ListenerNotifier(builder.listeners);
+    	this.notifier = notifier;
 
         // ...then check mandatory values
         if (directories.isEmpty()) {
@@ -75,23 +83,7 @@ public class DirectoryPoller {
                     + "before you can start the %s.";
             throw new IllegalStateException(String.format(message, pollerName, pollerName, builderName, pollerName));
         }
-
-        if (threadName.equals(DEFAULT_THREAD_NAME)) {
-            threadName = threadName + threadCount.incrementAndGet();
-        }
-        scheduledRunnable = new ScheduledRunnable(this);
-    }
-
-    /**
-     * @return a new {@link DirectoryPollerBuilder}.
-     */
-    public static DirectoryPollerBuilder newBuilder() {
-        return new DirectoryPollerBuilder();
-    }
-
-    void start() {
         executor = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-
             @Override
             public Thread newThread(Runnable r) {
                 Thread t = new Thread(r);
@@ -99,7 +91,19 @@ public class DirectoryPoller {
                 return t;
             }
         });
+    }
+
+    private String addCounterIfDefaultThreadName(String threadName) {
+        if (threadName.equals(DEFAULT_THREAD_NAME)) {
+            threadName = threadName + threadCount.incrementAndGet();
+        }
+        return threadName;
+	}
+
+    DirectoryPoller start() {
+        scheduledRunnable = new ScheduledRunnable(this);
         executor.scheduleAtFixedRate(scheduledRunnable, WITH_NO_DELAY, pollingIntervalInMillis, MILLISECONDS);
+        return this;
     }
 
     /**
@@ -178,7 +182,7 @@ public class DirectoryPoller {
                     Util.awaitTermination(executor);
                     scheduledRunnable.shutdown();
                     scheduledRunnable.awaitTermination();
-                    notifier.afterStop(new AfterStopEvent(dp));
+                    notifier.afterStop(new AfterStopEvent(dp, scheduledRunnable.pollers));
                     latch.countDown();
                     return null;
                 }

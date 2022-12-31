@@ -1,5 +1,6 @@
 package com.github.drapostolos.rdp4j;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -25,14 +26,19 @@ public final class DirectoryPollerFuture {
      * 
      * @return a started {@link DirectoryPoller} instance.
      */
-    public DirectoryPoller get() {
-        try {
-            return future.get();
-        } catch (Exception e) {
-            String message = "get() method threw exception!";
-            throw new UnsupportedOperationException(message, e);
-        }
-    }
+	public DirectoryPoller get() {
+		try {
+			return future.get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(e);
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				throw (RuntimeException) e.getCause();
+			}
+			throw new IllegalStateException(e);
+		}
+	}
 
     /**
      * @return true if {@link DirectoryPoller} has started, otherwise false.

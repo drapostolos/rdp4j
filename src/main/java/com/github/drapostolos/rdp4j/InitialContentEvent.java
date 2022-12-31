@@ -1,8 +1,8 @@
 package com.github.drapostolos.rdp4j;
 
-import static com.github.drapostolos.rdp4j.Util.copyValuesToFileElementSet;
+import static java.util.stream.Collectors.toSet;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 
 import com.github.drapostolos.rdp4j.spi.FileElement;
@@ -17,22 +17,43 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  * @see <a href="https://github.com/drapostolos/rdp4j/wiki/User-Guide">User-Guide</a>
  */
 public final class InitialContentEvent extends EventExposingPolledDirectory {
+    private final Set<FileElement> fileElements;
+    private final Set<CachedFileElement> cachedFileElements;
 
-    private final Set<FileElement> copy;
-
-    InitialContentEvent(DirectoryPoller dp, PolledDirectory directory, Map<String, CachedFileElement> initialFiles) {
+    InitialContentEvent(DirectoryPoller dp, PolledDirectory directory, Collection<FileElementAndCache> files) {
         super(dp, directory);
-        copy = copyValuesToFileElementSet(initialFiles);
+        fileElements = files.stream()
+        		.map(FileElementAndCache::getFileElement)
+        		.collect(toSet());
+        cachedFileElements = files.stream()
+        		.map(FileElementAndCache::getCachedFileElement)
+        		.collect(toSet());
+    }
+    
+	/**
+	 * Use {@link #getFileElements()} method instead.
+	 * 
+     * @return a set of all {@link FileElement}s contained in this {@link PolledDirectory}
+     *         at startup.
+     */
+    @Deprecated
+    public Set<FileElement> getFiles() {
+        return getFileElements();
+    }
+
+	/**
+     * @return a set of all {@link FileElement}s contained in this {@link PolledDirectory}
+     *         at startup.
+     */
+    public Set<FileElement> getFileElements() {
+        return fileElements;
     }
 
     /**
-     * @return a set of all {@link FileElement}s contained in a {@link PolledDirectory}
+     * @return a set of all {@link CachedFileElement}s contained in this {@link PolledDirectory}
      *         at startup.
      */
-    // TODO return the CachedFileElement instead? fix this when fixing :
-    // https://github.com/drapostolos/rdp4j/issues/2
-    public Set<FileElement> getFiles() {
-        return copy;
+    public Set<CachedFileElement> getCachedFileElements() {
+        return cachedFileElements;
     }
-
 }

@@ -5,31 +5,31 @@ import java.util.Map;
 
 final class HashMapComparer<K, V> {
 
-    private Map<K, V> m1, m2, added, removed;
+    private Map<K, V> oldMap, newMap, added, removed;
 
-    HashMapComparer(Map<K, V> m1, Map<K, V> m2) {
-        this.m1 = m1;
-        this.m2 = m2;
-        setAdded();
-        setRemoved();
+    HashMapComparer(Map<K, V> oldMap, Map<K, V> newMap) {
+        this.oldMap = oldMap;
+        this.newMap = newMap;
+        initAdded();
+        initRemoved();
     }
 
-    private void setAdded() {
-        added = new HashMap<K, V>(m2);
-        for (K key : m1.keySet()) {
+    private void initAdded() {
+        added = new HashMap<K, V>(newMap);
+        for (K key : oldMap.keySet()) {
             added.remove(key);
         }
     }
 
-    private void setRemoved() {
-        removed = new HashMap<K, V>(m1);
-        for (K key : m2.keySet()) {
+    private void initRemoved() {
+        removed = new HashMap<K, V>(oldMap);
+        for (K key : newMap.keySet()) {
             removed.remove(key);
         }
     }
 
     /**
-     * Returns the element that are in m2, but not in m1.
+     * Returns the element that are in newMap, but not in oldMap.
      * 
      * @return
      */
@@ -38,7 +38,7 @@ final class HashMapComparer<K, V> {
     }
 
     /**
-     * Returns the element that are in m1, but not in m2.
+     * Returns the element that are in oldMap, but not in newMap.
      * 
      * @return
      */
@@ -50,7 +50,7 @@ final class HashMapComparer<K, V> {
      * @return
      */
     boolean hasDiff() {
-        return !m1.equals(m2);
+        return !oldMap.equals(newMap);
     }
 
     @Override

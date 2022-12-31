@@ -11,7 +11,7 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 /**
  * An adapter for java's {@link File} class, that enables monitoring a directory
  * on the local file system. The main purpose of this adapter is to provide
- * an example how to use an Abstract Directory Poller.
+ * an example how to use a Directory Poller.
  * <p>
  * Using this to listen to events on your local file system is discouraged, use the 
  * Java7 WatchService functionality instead. For Java6 see other options
