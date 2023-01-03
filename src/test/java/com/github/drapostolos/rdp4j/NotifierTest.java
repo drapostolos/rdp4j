@@ -104,8 +104,8 @@ public class NotifierTest {
         Mockito.verifyNoMoreInteractions(l1);
         Mockito.verify(l3).fileAdded(e);
         Mockito.verifyNoMoreInteractions(l3);
-        Mockito.verifyZeroInteractions(l2);
-        Mockito.verifyZeroInteractions(l4);
+        Mockito.verifyNoInteractions(l2);
+        Mockito.verifyNoInteractions(l4);
 
     }
 

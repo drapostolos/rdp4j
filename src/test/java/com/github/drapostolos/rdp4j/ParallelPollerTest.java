@@ -26,7 +26,7 @@ public class ParallelPollerTest extends EventVerifier {
         pollerTask = new ScheduledRunnable(dp);
 
         // then
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(Executors.class);
         Executors.newSingleThreadExecutor();
     }
 
@@ -42,7 +42,7 @@ public class ParallelPollerTest extends EventVerifier {
         pollerTask = new ScheduledRunnable(dp);
 
         // then
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(Executors.class);
         Executors.newCachedThreadPool();
     }
 }
