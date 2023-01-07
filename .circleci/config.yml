@@ -1,0 +1,42 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3
+
+shared: &shared
+  working_directory: ~/repo
+  environment:
+    JVM_OPTS: -Xmx1g
+  steps:
+      - checkout
+      - run: ./gradlew clean build
+      - codecov/upload
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests/test
+          destination: test_result
+      - store_artifacts:
+          path: build/reports/jacoco
+          destination: test_coverage
+          
+jobs:
+  jdk8:
+    docker:
+      - image: cimg/openjdk:8.0
+    <<: *shared
+  jdk11:
+    docker:
+      - image: cimg/openjdk:11.0
+    <<: *shared
+  jdk17:
+    docker:
+      - image: cimg/openjdk:17.0
+    <<: *shared
+
+workflows:
+  version: 2.1
+  work:
+    jobs:
+      - jdk8
+      - jdk11
+      - jdk17

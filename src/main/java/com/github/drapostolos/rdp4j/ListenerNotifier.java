@@ -4,15 +4,14 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class ListenerNotifier {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ListenerNotifier.class);
+	private final Logger logger;
     final Set<Rdp4jListener> listeners = new CopyOnWriteArraySet<Rdp4jListener>();
 
-    ListenerNotifier(Set<Rdp4jListener> listeners) {
-        this.listeners.addAll(listeners);
+    ListenerNotifier(Logger logger, Set<Rdp4jListener> listeners) {
+        this.logger = logger;
+		this.listeners.addAll(listeners);
     }
 
     void addListener(Rdp4jListener listener) {
@@ -103,7 +102,7 @@ class ListenerNotifier {
     }
 
     private void logErrorMessage(Throwable t) {
-        LOG.error("Exception thrown by client implementation (of Rdp4jListener interface).", t);
+    	logger.error("Exception thrown by client implementation (of Rdp4jListener interface).", t);
     }
 
 }

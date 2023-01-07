@@ -23,9 +23,9 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 final class ScheduledRunnable implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledRunnable.class);
     final CopyOnWriteArraySet<Poller> pollers;
+    final ExecutorService executor;
     private final DirectoryPoller dp;
     private final ListenerNotifier notifier;
-    private final ExecutorService executor;
 
     ScheduledRunnable(DirectoryPoller directoryPoller) {
         dp = directoryPoller;

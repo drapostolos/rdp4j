@@ -1,97 +1,126 @@
+// https://medium.com/viascom/complete-guide-publish-with-gradle-to-maven-central-native-7b128addbb6
+// https://github.com/researchgate/gradle-release
 plugins {
-  id 'net.researchgate.release' version '2.8.0'
-  id 'java'
-  id 'maven'
-  id 'signing'
-  id 'jacoco'
+    id "maven-publish"
+    id "signing"
+    id "java-library"
+    id 'net.researchgate.release' version '3.0.2'
+    id 'jacoco'
 }
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 sourceCompatibility = 1.8
 group = 'com.github.drapostolos'
 archivesBaseName = 'rdp4j'
-afterReleaseBuild.dependsOn uploadArchives
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.21'
-    testCompile 'org.slf4j:slf4j-simple:1.7.21'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.powermock:powermock-api-mockito:1.6.5'
-    testCompile 'org.powermock:powermock-module-junit4:1.6.5'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'org.assertj:assertj-core:1.7.1'
+dependencies { 
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    
+    testImplementation 'ch.qos.logback:logback-classic:1.2.+'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation 'org.assertj:assertj-core:3.23.1'
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+test {
+    finalizedBy jacocoTestReport
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled = true
+        html.required = true
+    }
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
+publishing {
+    repositories {
+        maven {
+            def releaseRepo = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://oss.sonatype.org/content/repositories/snapshots/"
+            
+            name = "OSSRH"
+            url = isReleaseVersion ? releaseRepo : snapshotRepo
+            
+            credentials {
+                username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            
+            pom {
+                groupId = 'com.github.drapostolos'
+                name = 'RDP4J'
+                description = 'This library provides a Java SPI for polling directories on a REMOTE filesystem.'
+                url = 'https://github.com/drapostolos/rdp4j'
+                packaging = 'jar'
+
+                licenses {
+                    license {
+                        name = 'The MIT License (MIT)'
+                        url = 'http://opensource.org/licenses/MIT'
+                    }
+                }
+
+                scm {
+                    url = 'https://github.com/drapostolos/rdp4j'
+                    connection = 'scm:git://github.com:drapostolos/rdp4j.git'
+                    developerConnection = 'scm:git://github.com:drapostolos/rdp4j.git'
+                }
+
+                developers {
+                    developer {
+                        id = 'drapostolos'
+                        name = 'Alexander Poulikakos'
+                        email = 'github@labelscans.com'
+                    }
+                }
+            }
+        }
+    }
 }
 
 signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
+    sign publishing.publications.mavenJava
 }
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name 'RDP4J'
-        packaging 'jar'
-        description 'This library provides a Java SPI for polling directories on a REMOTE filesystem.'
-        url 'https://github.com/drapostolos/rdp4j'
-
-        scm {
-          connection 'scm:git:https://github.com/drapostolos/rdp4j'
-          developerConnection 'scm:git:https://github.com/drapostolos/rdp4j'
-          url 'https://github.com/drapostolos/rdp4j'
-        }
-
-        licenses {
-          license {
-            name 'The MIT License (MIT)'
-            url 'http://opensource.org/licenses/MIT'
-          }
-        }
-
-        developers {
-          developer {
-            id 'drapostolos'
-            name 'Alexander Poulikakos'
-            email 'github@labelscans.com'
-          }
-        }
-      }
-    }
-  }
+tasks.withType(Sign) {
+    onlyIf { isReleaseVersion }
 }
 
 release {
-    preTagCommitMessage = '[Gradle Release Plugin] - release '
-    tagCommitMessage = '[Gradle Release Plugin] - creating tag '
-    newVersionCommitMessage = '[Gradle Release Plugin] - prepare for next development iteration '
     tagTemplate = '$name-$version'
-    buildTasks = ['build']
+
+    git {
+        requireBranch.set('master')
+    }
 }
+afterReleaseBuild.dependsOn publish

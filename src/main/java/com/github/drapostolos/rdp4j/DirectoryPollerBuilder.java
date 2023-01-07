@@ -1,6 +1,7 @@
 package com.github.drapostolos.rdp4j;
 
 import static java.util.Arrays.asList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -257,7 +258,7 @@ public final class DirectoryPollerBuilder {
 
     private DirectoryPollerFuture future() {
 		Future<DirectoryPoller> f = Util.invokeTask("DP-BeforeStart", () -> {
-			ListenerNotifier notifier = new ListenerNotifier(listeners);
+			ListenerNotifier notifier = new ListenerNotifier(getLogger(ListenerNotifier.class), listeners);
 			notifier.beforeStart(new BeforeStartEvent(this));
 			/*
 			 * The DirectoryPoller must be constructed after triggering

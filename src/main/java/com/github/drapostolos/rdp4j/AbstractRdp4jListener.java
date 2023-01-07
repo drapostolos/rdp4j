@@ -17,8 +17,22 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
  */
 public abstract class AbstractRdp4jListener implements DirectoryListener, IoErrorListener, DirectoryPollerListener,
         PollCycleListener, InitialContentListener {
+	private Logger ioErrorLogger;
+    
+	/**
+	 * Constructs this skeletal implementation of all {@link Rdp4jListener} 
+	 * sub-interfaces.
+	 */
+    public AbstractRdp4jListener() {
+    	this(LoggerFactory.getLogger(AbstractRdp4jListener.class));
+	}
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractRdp4jListener.class);
+    /*
+     * test usage only.
+     */
+    AbstractRdp4jListener(Logger ioErrorLogger) {
+    	this.ioErrorLogger = ioErrorLogger;
+	}
 
     /**
      * Dummy implementation doing nothing.
@@ -66,7 +80,7 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
         String message = "I/O error raised when polling directory '%s'!";
         PolledDirectory dir = event.getPolledDirectory();
         IOException e = event.getIoException();
-        LOG.error(String.format(message, dir), e);
+        ioErrorLogger.error(String.format(message, dir), e);
     }
 
     /**
@@ -78,7 +92,7 @@ public abstract class AbstractRdp4jListener implements DirectoryListener, IoErro
     public void ioErrorCeased(IoErrorCeasedEvent event) throws InterruptedException {
         String message = "I/O error ceased when polling directory '%s'!";
         PolledDirectory dir = event.getPolledDirectory();
-        LOG.info(String.format(message, dir));
+        ioErrorLogger.info(String.format(message, dir));
     }
 
     /**
