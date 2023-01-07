@@ -15,7 +15,7 @@ java {
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-sourceCompatibility = 1.17
+sourceCompatibility = 1.8
 group = 'com.github.drapostolos'
 archivesBaseName = 'rdp4j'
 
