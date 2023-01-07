@@ -7,9 +7,30 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
 public class NotifierTest {
+	
+	Logger notifierLogger = Mockito.mock(Logger.class);
 
+	@Test
+	public void shouldLogWithErrorLevelWhenListenerThrows() throws Exception {
+		// Given
+		InitialContentListener listener = e -> {
+			throw new RuntimeException("test");
+		};
+		Set<Rdp4jListener> listeners = new HashSet<Rdp4jListener>();
+		listeners.add(listener);
+		ListenerNotifier notifier = new ListenerNotifier(notifierLogger, listeners);
+		
+		// When
+		notifier.initialContent(null);
+		
+		// Then
+		Mockito.verify(notifierLogger)
+		.error(Mockito.contains("Exception thrown by client implementation"), (Throwable) Mockito.any());
+	}
+	
     @Test
     public void canCheckIfListenerIsInstanceOfSpecificListenerInterface() throws Exception {
         Set<Rdp4jListener> listeners = new HashSet<Rdp4jListener>();
@@ -24,7 +45,7 @@ public class NotifierTest {
         listeners.add(listener);
 
         // when
-        ListenerNotifier notifier = new ListenerNotifier(listeners);
+        ListenerNotifier notifier = new ListenerNotifier(notifierLogger, listeners);
 
         // then
         assertThat(notifier.isInstanceOf(listener, DirectoryPollerListener.class)).isTrue();
@@ -35,7 +56,7 @@ public class NotifierTest {
     @Test
     public void constructNotifierWithNoListener() throws Exception {
         // when
-        ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
+        ListenerNotifier n = new ListenerNotifier(notifierLogger, new HashSet<Rdp4jListener>());
 
         // then
         assertThat(n.listeners.size()).isEqualTo(0);
@@ -48,7 +69,7 @@ public class NotifierTest {
         l.add(new Rdp4jListener() {});
 
         // when
-        ListenerNotifier n = new ListenerNotifier(l);
+        ListenerNotifier n = new ListenerNotifier(notifierLogger, l);
 
         // then
         assertThat(n.listeners.size()).isEqualTo(1);
@@ -56,7 +77,7 @@ public class NotifierTest {
 
     @Test
     public void AddAndRemoveListeners() throws Exception {
-        ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
+        ListenerNotifier n = new ListenerNotifier(notifierLogger, new HashSet<Rdp4jListener>());
         assertThat(n.listeners.size()).isEqualTo(0);
 
         Rdp4jListener l = new Rdp4jListener() {};
@@ -69,7 +90,7 @@ public class NotifierTest {
     @Test
     public void addSameListenerTwice() throws Exception {
         // given
-        ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
+        ListenerNotifier n = new ListenerNotifier(notifierLogger, new HashSet<Rdp4jListener>());
 
         // when
         Rdp4jListener l = new Rdp4jListener() {};
@@ -83,7 +104,7 @@ public class NotifierTest {
     @Test
     public void notifyListenersOfFileAddedEvent() throws Exception {
         // given
-        ListenerNotifier n = new ListenerNotifier(new HashSet<Rdp4jListener>());
+        ListenerNotifier n = new ListenerNotifier(notifierLogger, new HashSet<Rdp4jListener>());
         DirectoryListener l1 = Mockito.mock(DirectoryListener.class);
         IoErrorListener l2 = Mockito.mock(IoErrorListener.class);
         DirectoryListener l3 = Mockito.mock(DirectoryListener.class);

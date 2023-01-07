@@ -1,6 +1,8 @@
 package com.github.drapostolos.rdp4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,18 +10,24 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
 
 import com.github.drapostolos.rdp4j.spi.FileElement;
 import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 public class ScheduledRunnableTest extends EventVerifier {
+	
+	@Mock
+	Logger notifierLogger;
 
     @Before
     public void testFixture() throws Exception {
@@ -30,7 +38,7 @@ public class ScheduledRunnableTest extends EventVerifier {
         Mockito.when(directoryPollerMock.getDefaultFileFilter()).thenReturn(new DefaultFileFilter());
         directories.put(directoryMock, new HashSet<>());
         directoryPollerMock.directories = directories;
-        directoryPollerMock.notifier = new ListenerNotifier(new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
+        directoryPollerMock.notifier = new ListenerNotifier(notifierLogger, new HashSet<Rdp4jListener>(Arrays.asList(listenerMock)));
         pollerTask = new ScheduledRunnable(directoryPollerMock);
     }
 
@@ -41,6 +49,34 @@ public class ScheduledRunnableTest extends EventVerifier {
             pollerTask.awaitTermination();
         }
     }
+    
+    @Test
+	public void defaultLoggerCalledWhenIoErrorRaisedOrCeased() throws Exception {
+        // given 
+    	Logger ioErrorLogger = Mockito.mock(Logger.class);
+        Mockito.when(directoryMock.listFiles())
+                .thenThrow(new IOException("thrown from unit test!"))
+                .thenReturn(list("fileA/1", "fileB/1"))
+                ;
+        CountDownLatch secondPollCycle = new CountDownLatch(2);
+        
+        // When
+		DirectoryPoller dp = DirectoryPoller.newBuilder()
+		.addPolledDirectory(directoryMock)
+		.addListener(new AbstractRdp4jListener(ioErrorLogger) {
+			@Override
+			public void afterPollingCycle(AfterPollingCycleEvent event) throws InterruptedException {
+				secondPollCycle.countDown();
+			}
+		})
+		.start();
+		secondPollCycle.await();
+		dp.stop();
+		
+		// then
+		Mockito.verify(ioErrorLogger).error(contains("I/O error raised"), (IOException) any());
+		Mockito.verify(ioErrorLogger).info(contains("I/O error ceased"));
+	}
 
     @Test
     public void filterOutAFile() throws Exception {
@@ -160,7 +196,7 @@ public class ScheduledRunnableTest extends EventVerifier {
     }
 
     @Test
-    public void OneSuccesfulPoll() throws Exception {
+    public void oneSuccesfulPoll() throws Exception {
         // given 
         Mockito.when(directoryMock.listFiles())
                 .thenReturn(list());
