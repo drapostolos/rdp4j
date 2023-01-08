@@ -2,6 +2,9 @@ package com.github.drapostolos.rdp4j;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +22,7 @@ public class DirectoryPollerTest {
 
     private DirectoryPoller dp;
     private DirectoryPollerBuilder builder;
+    private Path persistedFile = Paths.get("file.dat");
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
@@ -33,7 +37,24 @@ public class DirectoryPollerTest {
         if (dp != null) {
             dp.stop();
         }
+        Files.deleteIfExists(persistedFile);
     }
+    
+    @Test
+	public void shouldThrowIfDefaultPersisterFileIsDirectory() throws Exception {
+        expectedEx.expect(IllegalStateException.class);
+        expectedEx.expectMessage("Persisted file cannot be a directory");
+        expectedEx.expectMessage(Paths.get("").toAbsolutePath().toString());
+
+        builder.enableDefaultStatePersisting(Paths.get(""), dir -> "", str -> null);
+	}
+
+    @Test
+	public void shouldNotThrowIfDefaultPersisterFileiExists() throws Exception {
+    	Files.createFile(persistedFile);
+
+        builder.enableDefaultStatePersisting(persistedFile, dir -> "", str -> null);
+	}
 
     @Test
     public void shouldThrowExceptionWhenNoPolledDirectorySetAtStart() {

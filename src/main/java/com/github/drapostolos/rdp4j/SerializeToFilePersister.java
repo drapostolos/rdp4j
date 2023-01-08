@@ -25,25 +25,25 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 
 class SerializeToFilePersister implements Persister {
 	private static final Logger LOG = LoggerFactory.getLogger(SerializeToFilePersister.class);
-	private Path storage;
+	private Path persistedFile;
 	private Function<String, PolledDirectory> stringToDirFunction;
 	private Function<PolledDirectory, String> dirToStringFunction;
 
 	SerializeToFilePersister(Path file, Function<String, PolledDirectory> stringToDir,
 			Function<PolledDirectory, String> dirToString) {
-				this.storage = file;
+				this.persistedFile = file;
 				this.stringToDirFunction = stringToDir;
 				this.dirToStringFunction = dirToString;
 	}
 
 	@Override
 	public boolean containsData() {
-		return Files.exists(storage);
+		return Files.exists(persistedFile);
 	}
 
 	@Override
 	public Map<PolledDirectory, Set<CachedFileElement>> readData() {
-		try (	FileInputStream fis = new FileInputStream(storage.toFile());
+		try (	FileInputStream fis = new FileInputStream(persistedFile.toFile());
 				ObjectInputStream ois = new ObjectInputStream(fis);){
 			@SuppressWarnings("unchecked")
 			Map<String, Set<CachedFileElement>> files = (Map<String, Set<CachedFileElement>>) ois.readObject();
@@ -62,8 +62,8 @@ class SerializeToFilePersister implements Persister {
 	
 	@Override
 	public void writeData(Map<PolledDirectory, Set<CachedFileElement>> data) {
-		createParentDirectoryIfMissing(storage);
-		try (FileOutputStream fos = new FileOutputStream(storage.toFile());
+		createParentDirectoryIfMissing(persistedFile);
+		try (FileOutputStream fos = new FileOutputStream(persistedFile.toFile());
 				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(convertMapKey(data, dirToStringFunction));
 			oos.flush();
@@ -87,7 +87,7 @@ class SerializeToFilePersister implements Persister {
 	}
 
 	private void log(Map<?, Set<CachedFileElement>> files, String subject) {
-		LOG.info(subject + " [in " + storage + "]");
+		LOG.info(subject + " [in " + persistedFile + "]");
 		files.forEach((polledDirectory, fileElements) -> {
 			LOG.info("  {} FileElements in {}", fileElements.size(), polledDirectory);
 		});
