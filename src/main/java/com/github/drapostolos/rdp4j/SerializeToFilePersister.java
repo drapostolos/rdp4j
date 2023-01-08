@@ -26,14 +26,14 @@ import com.github.drapostolos.rdp4j.spi.PolledDirectory;
 class SerializeToFilePersister implements Persister {
 	private static final Logger LOG = LoggerFactory.getLogger(SerializeToFilePersister.class);
 	private Path storage;
-	private Function<String, PolledDirectory> stringToDir;
-	private Function<PolledDirectory, String> dirToString;
+	private Function<String, PolledDirectory> stringToDirFunction;
+	private Function<PolledDirectory, String> dirToStringFunction;
 
 	SerializeToFilePersister(Path file, Function<String, PolledDirectory> stringToDir,
 			Function<PolledDirectory, String> dirToString) {
 				this.storage = file;
-				this.stringToDir = stringToDir;
-				this.dirToString = dirToString;
+				this.stringToDirFunction = stringToDir;
+				this.dirToStringFunction = dirToString;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ class SerializeToFilePersister implements Persister {
 			@SuppressWarnings("unchecked")
 			Map<String, Set<CachedFileElement>> files = (Map<String, Set<CachedFileElement>>) ois.readObject();
 			log(files, "Found persisted");
-			return convertMapKey(files, stringToDir);
+			return convertMapKey(files, stringToDirFunction);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -65,7 +65,7 @@ class SerializeToFilePersister implements Persister {
 		createParentDirectoryIfMissing(storage);
 		try (FileOutputStream fos = new FileOutputStream(storage.toFile());
 				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(convertMapKey(data, dirToString));
+			oos.writeObject(convertMapKey(data, dirToStringFunction));
 			oos.flush();
 			log(data, "Persisting data");
 		} catch (Exception e) {
