@@ -3,6 +3,7 @@ package com.github.drapostolos.rdp4j;
 import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,15 +48,27 @@ public final class DirectoryPollerBuilder {
      * 
      * @see DirectoryPollerBuilder#enableStatePersisting(Persister)
      * 
-     * @param file the files where to store persisted data.
+     * @param persistedFile the files where to store persisted data.
      * @param dirToString a function that converts your {@link PolledDirectory} implementations to a string.
      * @param stringToDir a function that converts a string (as produced by <code>dirToString</code>) 
      * to an implementation of your {@link PolledDirectory}.
      * @return {@link DirectoryPollerBuilder}
      */
-	public DirectoryPollerBuilder enableDefaultStatePersisting(Path file, 
+	public DirectoryPollerBuilder enableDefaultStatePersisting(Path persistedFile, 
 			Function<PolledDirectory, String> dirToString, Function<String, PolledDirectory> stringToDir) {
-		return enableStatePersisting(new SerializeToFilePersister(file, stringToDir, dirToString));
+        if (persistedFile == null) {
+            throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
+        }
+        if (dirToString == null) {
+            throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
+        }
+        if (stringToDir == null) {
+            throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
+        }
+        if(Files.exists(persistedFile) && Files.isDirectory(persistedFile)) {
+        	throw new IllegalStateException("Persisted file cannot be a directory: " + persistedFile.toAbsolutePath());
+        }
+		return enableStatePersisting(new SerializeToFilePersister(persistedFile, stringToDir, dirToString));
 	}
 
 	/**
@@ -70,6 +83,9 @@ public final class DirectoryPollerBuilder {
      * @return {@link DirectoryPollerBuilder}
 	 */
 	public DirectoryPollerBuilder enableStatePersisting(Persister persister) {
+        if (persister == null) {
+            throw new NullPointerException(NULL_ARGUMENT_ERROR_MESSAGE);
+        }
 		addListener(new StatePersister(persister));
 		return this;
 	}

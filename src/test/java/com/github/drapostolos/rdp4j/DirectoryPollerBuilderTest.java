@@ -1,5 +1,6 @@
 package com.github.drapostolos.rdp4j;
 
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -48,5 +49,25 @@ public class DirectoryPollerBuilderTest {
     public void nullListener() throws Exception {
         builder.addListener(null);
     }
+    
+    @Test(expected = NullPointerException.class)
+    public void nullDefaultStatePersisterFile() throws Exception {
+		builder.enableDefaultStatePersisting(null, dir -> "", str -> null);
+	}
+
+    @Test(expected = NullPointerException.class)
+    public void nullDefaultStatePersisterFunction1() throws Exception {
+		builder.enableDefaultStatePersisting(Paths.get("file.dat"), null, str -> null);
+	}
+
+    @Test(expected = NullPointerException.class)
+    public void nullDefaultStatePersisterFunction2() throws Exception {
+		builder.enableDefaultStatePersisting(Paths.get("file.dat"), dir -> "", null);
+	}
+
+    @Test(expected = NullPointerException.class)
+    public void nullStatePersister() throws Exception {
+		builder.enableStatePersisting(null);
+	}
 
 }
